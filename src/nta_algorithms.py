@@ -1,8 +1,18 @@
 """Module for NTA algorithms
+
+All the algorithms that says if number p is prime return True,
+if not, return False.
 """
 
 import math
 import random
+import os
+
+# print(f"Location: {os.getcwd()}")
+
+
+# from src import my_timer
+
 
 def Jacobi_symbol(a, n):
     """Mathmatical funtion to find Jacobi symbol value. It says
@@ -52,7 +62,9 @@ def modular_pow(n: int, pow: int, module: int):
     Args:
         n (int): natural number, the base number.
         pow (int): power.
-        module (int): module of the power
+        module (int): module of the power.
+    Returns:
+        int: modular power
     """
     rez = 1
     for i in range(pow):
@@ -64,15 +76,13 @@ def modular_pow(n: int, pow: int, module: int):
 
 def Soloway_Strassen_test(p: int, k: int=10):
     """Solovei-Strassen probability test says if the number
-    is prime
-
+    is really prime.
     Args:
         p (int): p is natural number that we will test if it is
         prime
         k (int): times that algorithm will repeat check (default is 10)
-
     Returns:
-        bool: True if number p isn't prime, False otherwise
+        bool: True if number p is prime, False otherwise
     """
     if p % 2 == 0:
         return False
@@ -96,8 +106,66 @@ def Soloway_Strassen_test(p: int, k: int=10):
         
     return True
 
+def get_i_th_bit(n: int, i: int):
+    """Calculates i-th bit of number n
+    Args:
+        n (int): number
+        i (int): index in number, the first (the right one) is on 0 place.
+    Returns:
+        int: i-th bit of number n, start  from 0
+    """
+    if i < 0:
+        raise ValueError("Error: indexes less than 0 aren't resolved at a moment")
+
+    return (n >> i) & 1
+
+def get_sum_ai_prod_ri_mod_m(n: int, m: int):
+    """Some formula hard computstions: sum a_i * r_i, from i = 0 to size of n
+    Args:
+        n (int): number from what the sum formula will be computed
+        m (int): module for computations
+    Returns:
+        int: rezult of formula
+    """
+    rez = 0
+
+    r_i = 1
+    for i in range(n.bit_length()):  # 32=100000  = 0 + 0 + 0 + 0 + 0 + 1 
+        # print(f"i: {i}, rez: {rez}, r_i: {r_i}, i-th: {get_i_th_bit(n=n, i=i)}, n: {n}")
+        rez += (get_i_th_bit(n=n, i=i) * r_i) % m
+        r_i = (r_i * 2) % m
+
+    return rez % m
+
+def method_of_trial_divisions(n: int, upper_border: int=47):
+    """Try do divide number n with all numbers under upper_border,
+    Args:
+        n (int): number
+        upper_border (int): [now is unresolved] upper border for calculations, In recomened 47
+    Returns:
+        bool: False if n is exactly not pirme. True in other way.
+    """
+    if upper_border == -1:
+        upper_border = int(math.sqrt(n))
+    elif upper_border < 2:
+        raise ValueError(f"Error: upper_border must be greather than 1 but {upper_border} is given")
+
+    if upper_border > int(math.sqrt(n)):
+        upper_border = int(math.sqrt(n))
+
+    for m in range(2, upper_border + 1):  # (+1) here because I want uper_border to be in cycle
+        n_modul = get_sum_ai_prod_ri_mod_m(n, m)
+        if n_modul == 0:
+            return False
+        
+    return True
+
+
+
 def main():
-    print(Soloway_Strassen_test(p=15, k=2))
+    # print(Soloway_Strassen_test(p=15, k=2))
+    # method_of_trial_divisions()
+    print(get_sum_ai_prod_ri_mod_m(n=(31*31), m=31))
 
 
 if __name__ == "__main__":
