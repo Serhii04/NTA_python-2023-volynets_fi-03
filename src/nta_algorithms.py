@@ -2,8 +2,8 @@
 
 All the algorithms that says if number p is prime return True,
 if not, return False.
-In future updtes that algorithms will return divisors, if number isn't
-prime, or (0 | -1 | n | 1 | other) if they are prime
+In future updtes that algorithms will return divisor, if number isn't
+prime, or 0 if they are prime
 """
 
 import math
@@ -191,6 +191,9 @@ def rho_method_of_Pollard(n: int):
                 return d
     
     return 0
+
+def Brillhart_Morrison_method(n: int):
+    pass
 
 
 
