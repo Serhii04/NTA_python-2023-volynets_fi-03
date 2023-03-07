@@ -2,6 +2,8 @@
 
 All the algorithms that says if number p is prime return True,
 if not, return False.
+In future updtes that algorithms will return divisors, if number isn't
+prime, or (0 | -1 | n | 1 | other) if they are prime
 """
 
 import math
@@ -161,7 +163,30 @@ def method_of_trial_divisions(n: int, upper_border: int=47):
         
     return True
 
+def __def_Poll_func(x: int, n: int):
+    return (x^2 + 1) % n
 
+def rho_method_of_Pollard(n: int, f=__def_Poll_func):
+    """Las-Vegas probability algorithm that says if number is fully prime
+
+    Args:
+        n (int): number
+        f (function): function from real number
+    
+    Returns:
+        bool: True if n in prime, False otherwise.
+    """
+    for i in range(20):
+        x = random.randint(a=1, b=n)
+        y = x
+        while x != y:
+            x = f(x)
+            y = f(f(y))
+            d = math.gcd(x - y, n)
+            if d != 1:
+                return d
+    
+    return 0
 
 def main():
     pass
