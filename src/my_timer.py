@@ -1,0 +1,29 @@
+import time
+
+class My_Timer:
+    def __init__(self):
+        self.start()
+
+    def start(self):
+        self.start_time = time.perf_counter()
+
+    def print_now(self):
+        print(f"Now you spend {self.now():0.2f} seconds")
+
+    def now(self):
+        now_time = time.perf_counter()
+        return now_time - self.start_time
+
+
+def main():
+    timer = My_Timer()
+
+    rez = 0
+    for i in range(3000):
+        rez *= i ** i
+
+    timer.print_now()
+
+
+if __name__ == "__main__":
+    main()
