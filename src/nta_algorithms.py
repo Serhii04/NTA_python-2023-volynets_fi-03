@@ -63,6 +63,7 @@ def modular_pow(n: int, pow: int, module: int):
         n (int): natural number, the base number.
         pow (int): power.
         module (int): module of the power.
+
     Returns:
         int: modular power
     """
@@ -77,10 +78,12 @@ def modular_pow(n: int, pow: int, module: int):
 def Soloway_Strassen_test(p: int, k: int=10):
     """Solovei-Strassen probability test says if the number
     is really prime.
+
     Args:
         p (int): p is natural number that we will test if it is
         prime
         k (int): times that algorithm will repeat check (default is 10)
+
     Returns:
         bool: True if number p is prime, False otherwise
     """
@@ -108,9 +111,11 @@ def Soloway_Strassen_test(p: int, k: int=10):
 
 def get_i_th_bit(n: int, i: int):
     """Calculates i-th bit of number n
+    
     Args:
         n (int): number
         i (int): index in number, the first (the right one) is on 0 place.
+    
     Returns:
         int: i-th bit of number n, start  from 0
     """
@@ -121,9 +126,11 @@ def get_i_th_bit(n: int, i: int):
 
 def get_sum_ai_prod_ri_mod_m(n: int, m: int):
     """Some formula hard computstions: sum a_i * r_i, from i = 0 to size of n
+    
     Args:
         n (int): number from what the sum formula will be computed
         m (int): module for computations
+    
     Returns:
         int: rezult of formula
     """
@@ -139,9 +146,11 @@ def get_sum_ai_prod_ri_mod_m(n: int, m: int):
 
 def method_of_trial_divisions(n: int, upper_border: int=47):
     """Try do divide number n with all numbers under upper_border,
+    
     Args:
         n (int): number
         upper_border (int): [now is unresolved] upper border for calculations, In recomened 47
+    
     Returns:
         bool: False if n is exactly not pirme. True in other way.
     """
@@ -163,9 +172,7 @@ def method_of_trial_divisions(n: int, upper_border: int=47):
 
 
 def main():
-    # print(Soloway_Strassen_test(p=15, k=2))
-    # method_of_trial_divisions()
-    print(get_sum_ai_prod_ri_mod_m(n=(31*31), m=31))
+    pass
 
 
 if __name__ == "__main__":
