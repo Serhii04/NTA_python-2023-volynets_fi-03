@@ -9,8 +9,6 @@ import random
 import os
 
 # print(f"Location: {os.getcwd()}")
-
-
 # from src import my_timer
 
 
@@ -34,12 +32,10 @@ def Jacobi_symbol(a, n):
     rez = 1
 
     while a != 0:
-        # print(f"a: {a}, n: {n}, rez: {rez}.")  # for manual tests
         while a % 2 == 0:
             if ((n*n - 1) / 8) % 2 == 1: 
                 rez *= -1
             a = int(a / 2)
-            # print(f"a: {a}, n: {n}, rez: {rez}.")  # for manual tests
 
         if a == 1:
             return rez
@@ -91,19 +87,16 @@ def Soloway_Strassen_test(p: int, k: int=10):
         return False
 
     for i in range(k):
-        # print(f"{i}-th try")
         x = random.randint(2, p-1)
 
         x_p_gcd = math.gcd(x, p)
-        # print(f"x: {x}, x_p_gcd: {x_p_gcd}.")
         if x_p_gcd > 1:
             return False
         
-        Euler_pseudo_prime = modular_pow(x, int((p-1)/2), p)  #pow(x, int((p-1)/2)) % p
+        Euler_pseudo_prime = modular_pow(x, int((p-1)/2), p)
         Jacobi_n = Jacobi_symbol(x, p)
         if Jacobi_n == -1:
             Jacobi_n += p
-        # print(f"x: {x}, Euler_pseudo_prime: {Euler_pseudo_prime}, Jacobi_n: {Jacobi_n}.")
         if Jacobi_n != Euler_pseudo_prime:
             return False
         
@@ -137,8 +130,7 @@ def get_sum_ai_prod_ri_mod_m(n: int, m: int):
     rez = 0
 
     r_i = 1
-    for i in range(n.bit_length()):  # 32=100000  = 0 + 0 + 0 + 0 + 0 + 1 
-        # print(f"i: {i}, rez: {rez}, r_i: {r_i}, i-th: {get_i_th_bit(n=n, i=i)}, n: {n}")
+    for i in range(n.bit_length()): 
         rez += (get_i_th_bit(n=n, i=i) * r_i) % m
         r_i = (r_i * 2) % m
 
