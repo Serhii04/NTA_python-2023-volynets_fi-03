@@ -65,8 +65,21 @@ def test_method_of_trial_divisions():
     assert nalg.method_of_trial_divisions(n=5) ==  True
     assert nalg.method_of_trial_divisions(n=(31*31)) ==  False
 
+# ---------------------------------------------------------------------
+#                       test rho_method_of_Pollard
+# ---------------------------------------------------------------------
+
 def test_rho_method_of_Pollard():
-    assert nalg.rho_method_of_Pollard(n=(31*31)) ==  False
-    assert nalg.rho_method_of_Pollard(n=(107)) ==  False
-    assert nalg.rho_method_of_Pollard(n=(3131)) ==  False
-    assert nalg.rho_method_of_Pollard(n=(3123)) ==  False
+    assert nalg.rho_method_of_Pollard(n=(2*3*5*7*11*13)) != 0
+    assert nalg.rho_method_of_Pollard(n=(31*31)) != 0
+    assert nalg.rho_method_of_Pollard(n=(107)) == 0
+    assert nalg.rho_method_of_Pollard(n=(107036579817239)) != 0
+    assert nalg.rho_method_of_Pollard(n=(9973)) == 0
+    assert nalg.rho_method_of_Pollard(n=(3131)) != 0
+    assert nalg.rho_method_of_Pollard(n=(3123)) != 0
+
+# ---------------------------------------------------------------------
+#                       test _____________________
+# ---------------------------------------------------------------------
+
+

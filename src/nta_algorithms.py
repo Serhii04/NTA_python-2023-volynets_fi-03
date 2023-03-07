@@ -163,34 +163,41 @@ def method_of_trial_divisions(n: int, upper_border: int=47):
         
     return True
 
-def __def_Poll_func(x: int, n: int):
-    return (x^2 + 1) % n
+def _f(x: int, n: int):
+    return (x*x + 1) % n
 
-def rho_method_of_Pollard(n: int, f=__def_Poll_func):
+def rho_method_of_Pollard(n: int):
     """Las-Vegas probability algorithm that says if number is fully prime
 
     Args:
         n (int): number
-        f (function): function from real number
+        # f (function): function from real number
     
     Returns:
         bool: True if n in prime, False otherwise.
     """
-    for i in range(20):
+    while True:
         x = random.randint(a=1, b=n)
-        y = x
+        x = _f(x, n)
+        y = _f(x, n)
         while x != y:
-            x = f(x)
-            y = f(f(y))
+            x = _f(x, n)
+            y = _f(_f(y, n), n)
+            # print(f"x: {x}, y: {y}")
             d = math.gcd(x - y, n)
             if d != 1:
+                if d == n:
+                    return 0
                 return d
     
     return 0
 
-def main():
-    pass
 
+
+def main():
+    print(rho_method_of_Pollard(n=(107)))
+    # print(_f(2, 5))
+    # print(_f(_f(2, 5), 5))
 
 if __name__ == "__main__":
     main()
