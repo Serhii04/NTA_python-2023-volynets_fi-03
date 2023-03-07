@@ -52,7 +52,8 @@ def modular_pow(n: int, pow: int, module: int):
     Args:
         n (int): natural number, the base number.
         pow (int): power.
-        module (int): module of the power"""
+        module (int): module of the power
+    """
     rez = 1
     for i in range(pow):
         rez *= n
