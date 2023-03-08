@@ -79,7 +79,132 @@ def test_rho_method_of_Pollard():
     assert nalg.rho_method_of_Pollard(n=(3123)) != 0
 
 # ---------------------------------------------------------------------
-#                       test _____________________
+#               test get_Brillhart_Morrison_factor_base
 # ---------------------------------------------------------------------
 
+def test_get_Brillhart_Morrison_factor_base():
+    assert nalg.get_Brillhart_Morrison_factor_base(n=7) == [-1, 2, 3]
+    assert nalg.get_Brillhart_Morrison_factor_base(n=203) == [-1, 2, 11, 17]
+    assert nalg.get_Brillhart_Morrison_factor_base(n=203, a=0.8) == [-1, 2, 11, 17, 41, 43]
+    assert nalg.get_Brillhart_Morrison_factor_base(n=203, a=0.2) == [-1, 2]
+    assert nalg.get_Brillhart_Morrison_factor_base(n=203, a=0.3) == [-1, 2]
+    assert nalg.get_Brillhart_Morrison_factor_base(n=203, a=0.6) == [-1, 2, 11, 17]
 
+def test_get_chain_fraction():
+    assert nalg.get_chain_fraction(n=203, k=3) == [14, 4, 28]
+    assert nalg.get_chain_fraction(n=203, k=6) == [14, 4, 28, 4, 28, 4]  # TODO: I want it to be ok
+    assert nalg.get_chain_fraction(n=203, k=8) == [14, 4, 28, 4, 28, 4, 28, 4]  # TODO: I want it to be ok
+    assert nalg.get_chain_fraction(n=2033, k=8) == [45, 11, 3, 1, 4, 1, 7, 2]  # TODO: I want it to be ok
+
+def test_get_B_smooth_list():
+    assert nalg.get_B_smooth_list([14, 4, 28], 203) == [14, 57, 189]
+    # assert nalg.get_B_smooth_list([14, 4, 28], 203) == [14, 57, -14]
+    # assert nalg.get_B_smooth_list([14, 4, 28], 203) == [14, 57, -14]
+    # assert nalg.get_B_smooth_list([14, 4, 28], 203) == [14, 57, -14]
+
+def test_get_B_smooth_list_square():
+    assert nalg.get_B_smooth_list_square([14, 57, 189], 203) == [-7, 1, -7]
+    # assert nalg.get_B_smooth_list_square([14, 57, -14], 203) == [-7, 1, -7]
+    # assert nalg.get_B_smooth_list_square([14, 57, -14], 203) == [-7, 1, -7]
+    # assert nalg.get_B_smooth_list_square([14, 57, -14], 203) == [-7, 1, -7]
+
+def test_convert_B_smooth_list_to_vector_list():
+    assert nalg.convert_B_smooth_list_to_vector_list(base=[-1, 11, 17],
+                                                     B_smooth_list=[196, 1, 196]) == [
+            None,
+            [0, 0, 0],
+            None,
+        ]
+    assert nalg.convert_B_smooth_list_to_vector_list(base=[-1, 2, 3, 7],
+                                                     B_smooth_list=[-48, 139, -7, 87, -27]) == [
+            [1, 0, 1, 0],
+            None,
+            [1, 0, 0, 1],
+            None,
+            [1, 0, 1, 0],
+        ]
+
+def test_vector_sum_is_null():
+    assert nalg.vector_sum_is_null([[1, 1, 1, 0],
+                                    [0, 1, 1, 0],
+                                    [1, 1, 0, 0],
+                                    [0, 1, 0, 0],]) == True
+    assert nalg.vector_sum_is_null([[1, 1, 1, 0],
+                                    [0, 1, 1, 0],
+                                    [1, 1, 0, 1],
+                                    [0, 1, 0, 0],]) == False
+    assert nalg.vector_sum_is_null([[1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],]) == True
+    assert nalg.vector_sum_is_null([[0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],]) == True
+    assert nalg.vector_sum_is_null([[1, 0, 0, 0],
+                                    [0, 1, 0, 0],
+                                    [0, 0, 1, 0],
+                                    [0, 0, 0, 1],]) == False
+    assert nalg.vector_sum_is_null([[1, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],]) == False
+
+def hard_test_solve_matrix():
+    assert nalg.solve_matrix(matrix=[  # solve_matrix 1
+        [1, 0, 0, 0, 1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 1, 0],
+        [1, 0, 1, 0, 0, 1, 0, 0, 0],
+    ]) == None
+    assert nalg.solve_matrix(matrix=[  # solve_matrix 2
+        [1, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 1, 0],
+        [1, 0, 1, 0, 0, 1, 0, 0, 0],
+    ]) == [1]
+    assert nalg.solve_matrix(matrix=[  # solve_matrix 3
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 1, 0],
+        [1, 0, 1, 0, 0, 1, 0, 0, 0],
+    ]) == [0]
+    assert nalg.solve_matrix(matrix=[  # solve_matrix 4
+        [1, 0, 0, 0, 1, 0, 1, 0, 0],
+        [1, 0, 0, 0, 1, 0, 1, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 1, 0],
+        [1, 0, 1, 0, 0, 1, 0, 0, 0],
+    ]) == [0, 1]
+    assert nalg.solve_matrix(matrix=[  # solve_matrix 5
+        [1, 0, 0, 0, 1, 0, 1, 0, 0],
+        [1, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 1, 0],
+        [1, 0, 1, 0, 0, 1, 0, 0, 0],
+    ]) == [1, 2, 3]
+    assert nalg.solve_matrix(matrix=[  # solve_matrix 6
+        [1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 1],
+    ]) == None
+    assert nalg.solve_matrix(matrix=[  # solve_matrix 7
+        [1, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0],
+        [0, 1, 1, 0, 0],
+        [0, 0, 1, 1, 0],
+        [0, 0, 0, 1, 0],
+    ]) == [0, 1, 2, 3, 4]
