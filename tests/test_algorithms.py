@@ -56,14 +56,15 @@ def test_get_sum_ai_prod_ri_mod_m():
     assert nalg.get_sum_ai_prod_ri_mod_m(n=42, m=21) == 0
     assert nalg.get_sum_ai_prod_ri_mod_m(n=32, m=8) == 0
     assert nalg.get_sum_ai_prod_ri_mod_m(n=107, m=53) == 1
+    assert nalg.get_sum_ai_prod_ri_mod_m(n=6123, m=2) == 1
 
 def test_method_of_trial_divisions():
-    assert nalg.method_of_trial_divisions(n=107) ==  True
-    assert nalg.method_of_trial_divisions(n=6) ==  False
-    assert nalg.method_of_trial_divisions(n=804) ==  False
-    assert nalg.method_of_trial_divisions(n=(107*107)) ==  True
-    assert nalg.method_of_trial_divisions(n=5) ==  True
-    assert nalg.method_of_trial_divisions(n=(31*31)) ==  False
+    assert nalg.method_of_trial_divisions(n=107) ==  False
+    assert bool(nalg.method_of_trial_divisions(n=6)) ==  True
+    assert bool(nalg.method_of_trial_divisions(n=804)) ==  True
+    assert nalg.method_of_trial_divisions(n=(107*107)) ==  False
+    assert nalg.method_of_trial_divisions(n=5) ==  False
+    assert bool(nalg.method_of_trial_divisions(n=(31*31))) ==  True
 
 # ---------------------------------------------------------------------
 #                       test rho_method_of_Pollard
