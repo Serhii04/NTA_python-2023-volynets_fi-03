@@ -109,14 +109,14 @@ def test_get_B_smooth_list_square():
     # assert nalg.get_B_smooth_list_square([14, 57, -14], 203) == [-7, 1, -7]
 
 def test_convert_B_smooth_list_to_vector_list():
-    assert nalg.convert_B_smooth_list_to_vector_list(base=[-1, 11, 17],
-                                                     B_smooth_list=[196, 1, 196]) == [
+    assert nalg.convert_B_smooth_list_square_to_vector_list(base=[-1, 11, 17],
+                                                     B_smooth_list_square=[196, 1, 196]) == [
             None,
             [0, 0, 0],
             None,
         ]
-    assert nalg.convert_B_smooth_list_to_vector_list(base=[-1, 2, 3, 7],
-                                                     B_smooth_list=[-48, 139, -7, 87, -27]) == [
+    assert nalg.convert_B_smooth_list_square_to_vector_list(base=[-1, 2, 3, 7],
+                                                     B_smooth_list_square=[-48, 139, -7, 87, -27]) == [
             [1, 0, 1, 0],
             None,
             [1, 0, 0, 1],
@@ -208,3 +208,8 @@ def hard_test_solve_matrix():
         [0, 0, 1, 1, 0],
         [0, 0, 0, 1, 0],
     ]) == [0, 1, 2, 3, 4]
+
+def test_remove_Nones():  # TODO: believe in its corectness
+    pass
+
+
