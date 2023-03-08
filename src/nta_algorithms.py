@@ -12,6 +12,7 @@ import sympy
 import itertools
 import numpy as np
 import os
+import decimal
 
 # print(f"Location: {os.getcwd()}")
 # from src import my_timer
@@ -58,6 +59,16 @@ def Jacobi_symbol(a, n):
     return 0
 
 def modular_pow(n: int, pow: int, module: int):
+    C = 1
+    A = n
+    for i in range(pow.bit_length()):
+        if get_i_th_bit(n=pow, i=i) == 1:
+            C = (C * A) % module
+        A = (A * A) % module
+    
+    return C
+
+def modular_pow_l(n: int, pow: int, module: int):
     """Methot that calculate modular power of n
     
     Args:
@@ -146,10 +157,10 @@ def method_of_trial_divisions(n: int, upper_border: int=47):
     
     Args:
         n (int): number
-        upper_border (int): [now is unresolved] upper border for calculations, In recomened 47
+        upper_border (int): [now is unresolved] upper border for calculations
     
     Returns:
-        bool: False if n is exactly not pirme. True in other way.
+        bool: divider if n is exactly not pirme. False in other way.
     """
     if upper_border == -1:
         upper_border = int(math.sqrt(n))
@@ -162,9 +173,10 @@ def method_of_trial_divisions(n: int, upper_border: int=47):
     for m in range(2, upper_border + 1):  # (+1) here because I want uper_border to be in cycle
         n_modul = get_sum_ai_prod_ri_mod_m(n, m)
         if n_modul == 0:
-            return False
+            # print(f">>>m: {m}, n_modul: {n_modul}, n: {n}")
+            return m
         
-    return True
+    return False
 
 def _f(x: int, n: int):
     return (x*x + 1) % n
@@ -177,7 +189,7 @@ def rho_method_of_Pollard(n: int):
         # f (function): function from real number
     
     Returns:
-        bool: True if n in prime, False otherwise.
+        bool: divisor if n is prime, False otherwise.
     """
     while True:
         x = random.randint(a=1, b=n)
@@ -193,7 +205,7 @@ def rho_method_of_Pollard(n: int):
                     return 0
                 return d
     
-    return 0
+    return False
 
 __PRIME_NUMBERS__ = [
     3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83,
@@ -449,8 +461,9 @@ def Brillhart_Morrison_method(n: int):
         if first_divisor != 1 and first_divisor != n:
             return first_divisor, second_divisor
 
+        a += 0.1
 
-    return None
+    return None, None
 
 def print_prime_numbers(n: int):
     num = 0
@@ -463,10 +476,13 @@ def print_prime_numbers(n: int):
         
         if i_is_prime:
             if num > 13:
-                print("")
+                print(" ")
                 num = 0
 
             print(f"{i}, ", end="")
+            num += 1
+    
+    print("")
 
 def brut_forsse(n):
     cur_n = n
@@ -476,19 +492,61 @@ def brut_forsse(n):
                 print(f"{i}: {cur_n}")
                 cur_n = int(cur_n / i)
 
+def canon_number_composition(n: int):
+    rez = list()
+
+    while n != 1:
+        if Soloway_Strassen_test(p=n, k=50):
+            rez.append(n)
+            print(f"Soloway_Strassen_test: There is a divisor: {n}")
+            n = 1
+            return rez
+        
+        m = method_of_trial_divisions(n=n)
+        if m:
+            if n % m == 0:
+                rez.append(m)
+                print(f"method_of_trial_divisions: There is a divisor: {m}")
+                n = int(decimal.Decimal(n) / m)
+                continue
+
+        a = rho_method_of_Pollard(n=n)
+        if a:
+            rez.append(a)
+            print(f"rho_method_of_Pollard: There is a divisor: {a}")
+            n = int(n / a)
+            
+            if Soloway_Strassen_test(p=n, k=10):
+                rez.append(n)
+                print(f"Soloway_Strassen_test: There is a divisor: {n}")
+                n = 1
+                return rez
+            
+        a, b = Brillhart_Morrison_method(n=n)
+        if a:
+            rez.append(a)
+            print(f"Brillhart_Morrison_method: There is a divisor: {a}")
+            n = int(n / a)
+            continue
+
+        print("я не можу знайти канонiчний розклад числа :(")
+        rez.append(n)
+        return rez
+
 
 def main():
-    # print(get_chain_fraction(n=203, k=3))
-    # print(convert_B_smooth_list_square_to_vector_list([-1, 11, 17], [196, 1, 196]))
-    print(Brillhart_Morrison_method(n=9073))
-    print(Brillhart_Morrison_method(n=17 * 19))
-    print(Brillhart_Morrison_method(n=211 * 43))
-    print(Brillhart_Morrison_method(n=83 * 47))
-    print(Brillhart_Morrison_method(n=6217 * 17 * 3 * 211))
-    print(Brillhart_Morrison_method(n=6217 * 17 * 3 * 211 * 8))
+    # print(Brillhart_Morrison_method(n=9073))
+    # print(Brillhart_Morrison_method(n=17 * 19))
+    # print(Brillhart_Morrison_method(n=211 * 43))
+    # print(Brillhart_Morrison_method(n=83 * 47))
+    # print(Brillhart_Morrison_method(n=6217 * 17 * 3 * 211))
+    # print(Brillhart_Morrison_method(n=6217 * 17 * 3 * 211 * 8))
 
+    # N = decimal.Decimal(691534156424661573)
 
-    # print(Brillhart_Morrison_method(n=691534156424661573))
+    # print(canon_number_composition(n=691534156424661573))
+    print(canon_number_composition(n=1449863225586482579))
+    
     # print_prime_numbers(100000)
     # brut_forsse(691534156424661573)
 
