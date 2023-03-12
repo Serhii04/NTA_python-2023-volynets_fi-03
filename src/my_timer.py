@@ -6,13 +6,21 @@ class My_Timer:
 
     def start(self):
         self.start_time = time.perf_counter()
+        self.last_time = self.start_time
 
     def print_now(self):
-        print(f"Now you spend {self.now():0.2f} seconds")
+        print(f"{self.now():0.2f} seconds")
 
     def now(self):
         now_time = time.perf_counter()
         return now_time - self.start_time
+    
+    def point(self):
+        """time from last call of point() function"""
+        now_time = time.perf_counter()
+        rez = now_time - self.last_time
+        self.last_time = now_time
+        return rez
 
 
 def main():
