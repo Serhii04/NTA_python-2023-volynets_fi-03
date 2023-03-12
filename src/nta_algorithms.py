@@ -588,7 +588,7 @@ def get_canon_number_composition(n: int):
     while n != 1:
         if Soloway_Strassen_test(p=n, k=50):
             rez.append(n)
-            print(f"Divisor: {n}, curent time: {timer.now():0.2f}, (spend: {timer.point():0.2f} seconds), Soloway Strassen test")
+            print(f"Divisor: {n}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Soloway Strassen test")
             n = 1
             return rez
         
@@ -596,19 +596,19 @@ def get_canon_number_composition(n: int):
         if m:
             if n % m == 0:
                 rez.append(m)
-                print(f"Divisor: {m}, curent time: {timer.now():0.2f}, (spend: {timer.point():0.2f} seconds), Trial divisions")
+                print(f"Divisor: {m}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Trial divisions")
                 n = int(decimal.Decimal(n) / m)
                 continue
 
         a = rho_method_of_Pollard(n=n)
         if a:
             rez.append(a)
-            print(f"Divisor: {a}, curent time: {timer.now():0.2f}, (spend: {timer.point():0.2f} seconds), Rho method of Pollard")
+            print(f"Divisor: {a}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Rho method of Pollard")
             n = int(n / a)
             
             if Soloway_Strassen_test(p=n, k=10):
                 rez.append(n)
-                print(f"Divisor: {n}, curent time: {timer.now():0.2f}, (spend: {timer.point():0.2f} seconds), Soloway Strassen test")
+                print(f"Divisor: {n}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Soloway Strassen test")
                 n = 1
                 return rez
             continue
@@ -616,7 +616,7 @@ def get_canon_number_composition(n: int):
         a, b = Brillhart_Morrison_method(n=n)
         if a:
             rez.append(a)
-            print(f"Divisor: {a}, curent time: {timer.now():0.2f}, (spend: {timer.point():0.2f} seconds), Brillhart Morrison method")
+            print(f"Divisor: {a}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Brillhart Morrison method")
             n = int(n / a)
             continue
 
