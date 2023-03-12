@@ -55,16 +55,6 @@ def Jacobi_symbol(a, n):
     return 0
 
 def modular_pow(n: int, pow: int, module: int):
-    C = 1
-    A = n
-    for i in range(pow.bit_length()):
-        if get_i_th_bit(n=pow, i=i) == 1:
-            C = (C * A) % module
-        A = (A * A) % module
-    
-    return C
-
-def modular_pow_l(n: int, pow: int, module: int):
     """Methot that calculate modular power of n
     
     Args:
@@ -75,13 +65,14 @@ def modular_pow_l(n: int, pow: int, module: int):
     Returns:
         int: modular power
     """
-    rez = 1
-    for i in range(pow):
-        rez *= n
-
-        rez = rez % module
-
-    return rez
+    C = 1
+    A = n
+    for i in range(pow.bit_length()):
+        if get_i_th_bit(n=pow, i=i) == 1:
+            C = (C * A) % module
+        A = (A * A) % module
+    
+    return C
 
 def Soloway_Strassen_test(p: int, k: int=10):
     """Solovei-Strassen probability test says if the number
@@ -172,7 +163,6 @@ def method_of_trial_divisions(n: int, upper_border: int=47):
     for m in range(2, upper_border + 1):  # (+1) here because I want uper_border to be in cycle
         n_modul = get_sum_ai_prod_ri_mod_m(n, m)
         if n_modul == 0:
-            # print(f">>>m: {m}, n_modul: {n_modul}, n: {n}")
             return m
         
     return False
@@ -197,7 +187,6 @@ def rho_method_of_Pollard(n: int):
         while x != y:
             x = _f(x, n)
             y = _f(_f(y, n), n)
-            # print(f"x: {x}, y: {y}")
             d = math.gcd(x - y, n)
             if d != 1:
                 if d == n:
@@ -276,7 +265,6 @@ def get_Brillhart_Morrison_factor_base(n: int, a: float=(1/math.sqrt(2))):
         list: list of elements in factor base
     """
     La = math.pow(math.exp(math.pow((math.log2(n) * math.log2(math.log2(n))), 0.5)), a)
-    # print(f"La: {La}")
 
     base = [-1]
 
@@ -306,7 +294,6 @@ def get_chain_fraction(n: int, k: int):
     alpha = math.sqrt(n)
     a = int(alpha // 1)
     u = a
-    # print(f"v: {v}, alpha: {alpha}, a: {a}, u: {u}")
 
     chain_fraction = [a]
     for i in range(k-1):  # (-1) becuse one had been append
@@ -315,7 +302,6 @@ def get_chain_fraction(n: int, k: int):
         a = int(alpha // 1)
         chain_fraction.append(a)
         u = v*a - u
-        # print(f"v: {v}, alpha: {alpha}, a: {a}, u: {u}")
     
     return chain_fraction
 
@@ -411,33 +397,6 @@ def transpose_matrix(matrix):
     
     return t_matrix
 
-def Gaus_matrix(matrix):
-    """Returns:
-        matrix: matrix with zeros below diagonal line 
-    """
-    temp_matrix = list(matrix)
-    places = [i for i in range(len(matrix))]
-
-    for i in range(min(len(temp_matrix), len(temp_matrix[0]))):  # i - is column id, but will be used as diagonal index
-        if temp_matrix[i][i] == 0:
-            l = i + 1
-            while temp_matrix[i][i] == 0 and l < len(temp_matrix):
-                if temp_matrix[l][i] == 1:
-                    places[i], places[l] = places[l], places[i]
-                    temp_matrix[i], temp_matrix[l] = temp_matrix[l], temp_matrix[i]
-                    
-                    # for c in range(i, len(temp_matrix[0])):
-                    #     temp_matrix[i][c] = (temp_matrix[l][c] + temp_matrix[i][c]) % 2
-                
-                l += 1
-  
-        for l in range(i+1, len(temp_matrix)):
-            if temp_matrix[l][i] == 1:
-                for c in range(i, len(temp_matrix[0])):
-                    temp_matrix[l][c] = (temp_matrix[l][c] + temp_matrix[i][c]) % 2
-
-    return temp_matrix, places
-
 def solve_matrix(matrix):
     """Solve linear equation in f(2)
     
@@ -446,9 +405,6 @@ def solve_matrix(matrix):
     """
     if len(matrix) == 0:
         return None
-    
-    # for l in matrix:
-    #     print(l)
 
     s_matrix = smolarise_matrix(matrix=matrix)
 
@@ -490,35 +446,20 @@ def remove_Nones(B_smooth_list: list, B_smooth_list_square: list, S: list):
     return short_B_smooth_list, short_B_smooth_list_square, short_S
 
 def Brillhart_Morrison_method(n: int):
-    a = 0.001  # 1 / math.sqrt(2)
+    a = 0.001
     while a < 1:
-        # print(f"a: {a}")
         base = get_Brillhart_Morrison_factor_base(n=n, a=a)
-        # print(f"base: {base}")
         chain_fraction = get_chain_fraction(n=n, k=(len(base) + 1))
-        # print(f"chain_fraction: {chain_fraction}")
         B_smooth_list = get_B_smooth_list(n=n, chain_fraction=chain_fraction)
-        # print(f"B_smooth_list: {B_smooth_list}")
         B_smooth_list_square = get_B_smooth_list_square(n=n, B_smooth_list=B_smooth_list)
-        # print(f"B_smooth_list_square: {B_smooth_list_square}")
-
+        
         S = convert_B_smooth_list_square_to_vector_list(base=base, B_smooth_list_square=B_smooth_list_square)
 
         B_smooth_list, B_smooth_list_square, S = remove_Nones(B_smooth_list=B_smooth_list,
                                                               B_smooth_list_square=B_smooth_list_square,
                                                               S=S)
         
-        # for l in S:
-        #     print(f"\t{l}")
-
         S_solvation = solve_matrix(matrix=S)
-
-        # print(f"S_solvation: {S_solvation}")
-        
-        # S_solvation = remove_unnesesary_lines(S_solvation)
-        # B_smooth_list, B_smooth_list_square, S_solvation = remove_Nones(B_smooth_list=B_smooth_list,
-        #                                                                 B_smooth_list_square=B_smooth_list_square,
-        #                                                                 S=S_solvation)
 
         if S_solvation == None:
             if a < 37:
@@ -556,7 +497,6 @@ def print_prime_numbers(n: int):
         i_is_prime = True
         for j in range(2, i):
             if (i % j) == 0:
-                # print(f"i: {i}, j: {j}")
                 i_is_prime = False
         
         if i_is_prime:
@@ -624,7 +564,20 @@ def get_canon_number_composition(n: int):
         rez.append(n)
         return rez
 
-__NUMBERS__ = [
+__NUMBERS__1__ = [
+    901667173167834173,
+    323324583518541583,
+    2500744714570633849,
+    691534156424661573,
+    1184056490329830239,
+    1449863225586482579,
+    778320232076288167,
+    1515475730401555091,
+    341012868237902669,
+    7442109405582674149,
+]
+
+__NUMBERS__2__ = [
     572376191,
     194991569,
     962116741,
@@ -649,22 +602,21 @@ __NUMBERS__ = [
 ]
 
 def main():
-    print()
-    print(get_canon_number_composition(n=691534156424661573), end="\n\n")
-    # print(get_canon_number_composition(n=79120395871928357109483571238610239857103241), end="\n\n")
-    # print(get_canon_number_composition(n=823423016272041082880), end="\n\n")
-    # print(get_canon_number_composition(n=36954229748537), end="\n\n")
-    # print(get_canon_number_composition(n=1449863225586482579), end="\n\n")
-    # print(get_canon_number_composition(n=3009182572376191), end="\n\n")
-    # print(get_canon_number_composition(n=3*3*3*3*3*3*3*3*3), end="\n\n")
-    # print(get_canon_number_composition(n=2*2*2*2), end="\n\n")
+    # print()
+
+    # print(get_canon_number_composition(n=691534156424661573), end="\n\n")
+
     # print(Brillhart_Morrison_method(n=9073))
     # print(Brillhart_Morrison_method(n=1829))
 
-    # import my_timer
-    # for n in __NUMBERS__:
+    import my_timer
+    # for n in __NUMBERS__1__:
     #     timer = my_timer.My_Timer()
-    #     print(f"For number {n}: {Brillhart_Morrison_method(n)}: spend: {timer.now()}")
+    #     print(f"For number {n}: {rho_method_of_Pollard(n)}: spend: {timer.now():0.6f}")
+
+    for n in __NUMBERS__2__:
+        timer = my_timer.My_Timer()
+        print(f"For number {n}: {Brillhart_Morrison_method(n)}: spend: {timer.now():0.6f}")
 
 
 if __name__ == "__main__":
