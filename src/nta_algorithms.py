@@ -611,6 +611,7 @@ def get_canon_number_composition(n: int):
                 print(f"Divisor: {n}, curent time: {timer.now():0.2f}, (spend: {timer.point():0.2f} seconds), Soloway Strassen test")
                 n = 1
                 return rez
+            continue
             
         a, b = Brillhart_Morrison_method(n=n)
         if a:
@@ -650,13 +651,13 @@ __NUMBERS__ = [
 def main():
     print()
     print(get_canon_number_composition(n=691534156424661573), end="\n\n")
-    print(get_canon_number_composition(n=79120395871928357109483571238610239857103241), end="\n\n")
-    print(get_canon_number_composition(n=823423016272041082880), end="\n\n")
-    print(get_canon_number_composition(n=36954229748537), end="\n\n")
-    print(get_canon_number_composition(n=1449863225586482579), end="\n\n")
-    print(get_canon_number_composition(n=3009182572376191), end="\n\n")
-    print(get_canon_number_composition(n=3*3*3*3*3*3*3*3*3), end="\n\n")
-    print(get_canon_number_composition(n=2*2*2*2), end="\n\n")
+    # print(get_canon_number_composition(n=79120395871928357109483571238610239857103241), end="\n\n")
+    # print(get_canon_number_composition(n=823423016272041082880), end="\n\n")
+    # print(get_canon_number_composition(n=36954229748537), end="\n\n")
+    # print(get_canon_number_composition(n=1449863225586482579), end="\n\n")
+    # print(get_canon_number_composition(n=3009182572376191), end="\n\n")
+    # print(get_canon_number_composition(n=3*3*3*3*3*3*3*3*3), end="\n\n")
+    # print(get_canon_number_composition(n=2*2*2*2), end="\n\n")
     # print(Brillhart_Morrison_method(n=9073))
     # print(Brillhart_Morrison_method(n=1829))
 
