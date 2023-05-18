@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from collections import defaultdict
 
 import nta_algorithms_lab_1 as lab_1
+import my_timer
 
 
 ######################################
@@ -29,12 +30,20 @@ def time_limit(seconds):
 ######################################
 
 def discrete_logarithm_brute_force_timed(alpha: int, beta: int, p: int, timeout: int=10) -> int:
+    timer = my_timer.My_Timer()
+
+    rez = None
     try:
         with time_limit(timeout):
-            return discrete_logarithm_brute_force(alpha=alpha, beta=beta, p=p)
+            rez = discrete_logarithm_brute_force(alpha=alpha, beta=beta, p=p)
     except UserWarning as e:
         print("Timed out!")
     
+    if rez:
+        print(f"find rezult: x = {rez}, spend: {timer.now():0.4f}s")
+    else:
+        print("No result")
+
     return None
 
 def discrete_logarithm_brute_force(alpha: int, beta: int, p: int) -> int:
@@ -48,14 +57,22 @@ def discrete_logarithm_brute_force(alpha: int, beta: int, p: int) -> int:
 # S-P-G algorithm
 ######################################
 
-# def SPG_timed(alpha: int, beta: int, n: int, timeout: int=10) -> int:
-#     try:
-#         with time_limit(timeout):
-#             return SPG(alpha=alpha, beta=beta, n=n)
-#     except UserWarning as e:
-#         print("Timed out!")
+def SPG_timed(alpha: int, beta: int, n: int, timeout: int=10) -> int:
+    timer = my_timer.My_Timer()
+
+    rez = None
+    try:
+        with time_limit(timeout):
+            rez = SPG(alpha=alpha, beta=beta, n=n)
+    except UserWarning as e:
+        print("Timed out!")
     
-#     return None
+    if rez:
+        print(f"find rezult: x = {rez}, spend: {timer.now():0.4f}s")
+    else:
+        print("No result")
+
+    return rez
 
 def get_canon_degrees(n: int) -> defaultdict:
     canon_n = lab_1.get_canon_number_composition_silent(n)
@@ -187,13 +204,8 @@ def SPG_example():
     alpha = 999559
     beta = 1264341
     p = 4700383
-    x = SPG(alpha=alpha, beta=beta, n=p-1)
+    x = SPG_timed(alpha=alpha, beta=beta, n=p-1)
     
-    if x:
-        print(f"x = {x}")
-        # print(f"{alpha}^{x} = {beta} (mod {p})")
-    else:
-        print("No solution")
 
 def main():
     # brute_force_example()
