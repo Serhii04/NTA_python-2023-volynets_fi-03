@@ -124,7 +124,6 @@ def Chinese_remainder_theorem(a_list: list, mod_list: list) -> int:
 def SPG(alpha: int, beta: int, n: int) -> int:
     # 1st step
     canon_n = get_canon_degrees(n)
-    print(f"canon_n = {canon_n}")
 
     # 2nd step
     pre_table = dict()
@@ -135,48 +134,33 @@ def SPG(alpha: int, beta: int, n: int) -> int:
             pre_table_p_i[r] = j
         
         pre_table[p_i] = pre_table_p_i
-    
-    print(pre_table)
 
-    # 3rd step
+    # 3rd -5th steps
     a_list = list()
     mod_list = list()
     for p_i, i in zip(canon_n, range(len(canon_n))):
-        print(f"p_i={p_i}, i={i}")
         cur_alpha = 1
         alpha_neg = reverse(alpha, n+1)
-        # alpha_neg = reverse(alpha, p_i)
         x_coefs = list()
         for j in range(canon_n[p_i]):
-            print(f"j={j}")
             temp = pow(beta * cur_alpha, int(n / pow(p_i, j+1)), n+1)
             x_coefs.append(pre_table[p_i][temp])
             cur_alpha *= pow(alpha_neg, x_coefs[-1] * pow(p_i, j), n+1)
-            print(f"x_coef={x_coefs}, temp={temp}, cur_alpha={cur_alpha}")
 
-        # TODO: create equatations
-        print(x_coefs)
         m_i = pow(p_i, canon_n[p_i])
-        
+
         a_i = 0
         for i, x_c in enumerate(x_coefs):
             a_i += x_c * pow(p_i, i)
 
         a_list.append(a_i)
         mod_list.append(m_i)
-    
-    print(a_list)
-    print(mod_list)
 
+    # 6th step
     X = Chinese_remainder_theorem(a_list=a_list, mod_list=mod_list)
 
-    print(X)
 
     return X
-
-
-    
-    return None
 
 
 ######################################
@@ -196,9 +180,13 @@ def brute_force_example():
         print("No solution")
 
 def SPG_example():
-    alpha = 5 # 999559
-    beta = 11 # 1264341
-    p = 97 # 4700383
+    alpha = 999559
+    beta = 1264341
+    p = 4700383
+
+    alpha = 999559
+    beta = 1264341
+    p = 4700383
     x = SPG(alpha=alpha, beta=beta, n=p-1)
     
     if x:
