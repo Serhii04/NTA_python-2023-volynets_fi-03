@@ -563,6 +563,55 @@ def get_canon_number_composition(n: int):
         print("я не можу знайти канонiчний розклад числа :(")
         rez.append(n)
         return rez
+    
+def get_canon_number_composition_silent(n: int):
+    # import my_timer
+
+    rez = list()
+
+    # timer = my_timer.My_Timer()
+    # print(f"Start factorisation of number: {n}")
+
+    while n != 1:
+        if Soloway_Strassen_test(p=n, k=50):
+            rez.append(n)
+            # print(f"Divisor: {n}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Soloway Strassen test")
+            n = 1
+            return rez
+        
+        m = method_of_trial_divisions(n=n)
+        if m:
+            if n % m == 0:
+                rez.append(m)
+                # print(f"Divisor: {m}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Trial divisions")
+                n = int(decimal.Decimal(n) / m)
+                continue
+
+        a = rho_method_of_Pollard(n=n)
+        if a:
+            rez.append(a)
+            # print(f"Divisor: {a}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Rho method of Pollard")
+            n = int(n / a)
+            
+            if Soloway_Strassen_test(p=n, k=10):
+                rez.append(n)
+                # print(f"Divisor: {n}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Soloway Strassen test")
+                n = 1
+                return rez
+            continue
+            
+        a, b = Brillhart_Morrison_method(n=n)
+        if a:
+            rez.append(a)
+            # print(f"Divisor: {a}, curent time: {timer.now():0.4f}, (spend: {timer.point():0.4f} seconds), Brillhart Morrison method")
+            n = int(n / a)
+            continue
+
+        # print("я не можу знайти канонiчний розклад числа :(")
+        # rez.append(n)
+        # return rez
+
+        return None
 
 __NUMBERS__1__ = [
     901667173167834173,
