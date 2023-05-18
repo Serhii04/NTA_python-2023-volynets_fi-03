@@ -29,7 +29,7 @@ def time_limit(seconds):
 # Brute force function implementation
 ######################################
 
-def discrete_logarithm_brute_force_timed(alpha: int, beta: int, p: int, timeout: int=10) -> int:
+def discrete_logarithm_brute_force_timed(alpha: int, beta: int, p: int, timeout: int=5*60) -> int:
     timer = my_timer.My_Timer()
 
     rez = None
@@ -40,16 +40,20 @@ def discrete_logarithm_brute_force_timed(alpha: int, beta: int, p: int, timeout:
         print("Timed out!")
     
     if rez:
-        print(f"find rezult: x = {rez}, spend: {timer.now():0.4f}s")
+        print(f"{alpha}^x = {beta} (mod {p})")
+        print(f"BRUTE: find: x = {rez}, spend: {timer.now():0.4f}s")
     else:
-        print("No result")
+        print(f"No result, spend: {timer.now():0.4f}s")
 
     return None
 
 def discrete_logarithm_brute_force(alpha: int, beta: int, p: int) -> int:
+    cur = 1
     for i in range(p):
-        if pow(alpha, i, p) == beta:
+        if cur == beta:
             return i
+
+        cur = (cur * alpha) % p
     
     return None
 
@@ -57,7 +61,7 @@ def discrete_logarithm_brute_force(alpha: int, beta: int, p: int) -> int:
 # S-P-G algorithm
 ######################################
 
-def SPG_timed(alpha: int, beta: int, n: int, timeout: int=10) -> int:
+def SPG_timed(alpha: int, beta: int, n: int, timeout: int=60*5) -> int:
     timer = my_timer.My_Timer()
 
     rez = None
@@ -68,16 +72,17 @@ def SPG_timed(alpha: int, beta: int, n: int, timeout: int=10) -> int:
         print("Timed out!")
     
     if rez:
-        print(f"find rezult: x = {rez}, spend: {timer.now():0.4f}s")
+        print(f"{alpha}^x = {beta} (mod {n+1})")
+        print(f"S-P-G: find: x = {rez}, spend: {timer.now():0.4f}s")
     else:
-        print("No result")
+        print(f"No result, spend: {timer.now():0.4f}s")
 
     return rez
 
 def get_canon_degrees(n: int) -> defaultdict:
     canon_n = lab_1.get_canon_number_composition_silent(n)
 
-    if canon_n[0] == None:
+    if canon_n[0] is None:
         return None
 
     canon_dict = defaultdict(int)
@@ -197,19 +202,47 @@ def brute_force_example():
         print("No solution")
 
 def SPG_example():
-    alpha = 999559
-    beta = 1264341
-    p = 4700383
+    alpha = 5738687257268
+    beta = 7409477599667
+    p = 8658745039699
 
-    alpha = 999559
-    beta = 1264341
-    p = 4700383
     x = SPG_timed(alpha=alpha, beta=beta, n=p-1)
-    
+    # x = discrete_logarithm_brute_force_timed(alpha=alpha, beta=beta, p=p)
+
+def example():
+    alpha1_list = [304, 4278, 63906, 211693, 1620605, 15245244, 469727668, 1359824064, 24716418997, 528240302967]
+    beta1_list = [615, 6380, 65125, 35674, 71209, 3043565, 361909909, 726082814, 87306741861, 605294851516]
+    p1_list = [977, 6959, 88657, 219881, 1871017, 19701761, 624411923, 2390481859, 88260796907, 972274582501]
+
+    alpha2_list = [3, 4873, 60994, 772172, 4444479, 13555852, 380311257, 8276799293, 66019272825, 132977861593]
+    beta2_list = [131, 8049, 31908, 750538, 2352131, 11348210, 642846646, 6630184641, 64366317970, 6735584011]
+    p2_list = [211, 9467, 66293, 859787, 8184221, 16748539, 674765849, 9645221401, 75288481337, 638147190619]
+
+    # SPG
+    for i in range(3, 13):
+        print(f">>> p = {i}")
+
+        print(f"First type")
+        x = SPG_timed(alpha=alpha1_list[i-3], beta=beta1_list[i-3], n=p1_list[i-3]-1)
+
+        print(f"Second type")
+        x = SPG_timed(alpha=alpha2_list[i-3], beta=beta2_list[i-3], n=p2_list[i-3]-1)
+
+    print()
+    # BRT
+    for i in range(3, 10):
+        print(f">>> p = {i}")
+
+        print(f"First type")
+        x = discrete_logarithm_brute_force_timed(alpha=alpha1_list[i-3], beta=beta1_list[i-3], p=p1_list[i-3])
+
+        print(f"Second type")
+        x = discrete_logarithm_brute_force_timed(alpha=alpha2_list[i-3], beta=beta2_list[i-3], p=p2_list[i-3])
 
 def main():
     # brute_force_example()
-    SPG_example()
+    # SPG_example()
+    example()
 
 if __name__ == "__main__":
     main()
