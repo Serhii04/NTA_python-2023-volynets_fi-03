@@ -257,7 +257,7 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
     return equations, b_values
 
 # Third step of index_calculus
-def solve_equations(alpha: int, beta: int, n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
+def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
     rez = None
     for perm in itertools.permutations(zip(equations, b_values), len(base)):
         A = list()
