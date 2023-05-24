@@ -278,6 +278,33 @@ def solve_equations(alpha: int, beta: int, n: int, base: list, base_r: dict, equ
         # print(f"rez = {rez}")
         return rez
 
+# Forth step of index_calculus
+def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_values: list) -> int:
+    l = 0
+    while True:
+        is_smooth = True
+        a = beta * pow(alpha, l, n + 1) % (n + 1)
+        print(f">>> {a} = pow({alpha}, {l}, {n + 1})")
+        
+        canon_a = lab_1.get_canon_number_composition_silent(a)
+        print(f"{l}) {a} = {canon_a}")
+        
+        if canon_a is None:
+            is_smooth = False
+        else:
+            for a_i in canon_a:
+                if a_i not in base:
+                    is_smooth = False
+            
+        if is_smooth:
+            rez_sum = -l
+            for a_i in canon_a:
+                rez_sum = (rez_sum + logs_values[base_r[a_i]]) % n
+            
+            return rez_sum
+    
+        l += 1
+
 def index_calculus(alpha: int, beta: int, n: int) -> int:
     base, base_r = get_factor_base(n=n)
     print(base)
