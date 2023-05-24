@@ -75,6 +75,53 @@ __PRIMES__ = [
 #              Helpful algorithms
 # *********************************************
 
+def reverse(a: int, M: int) -> int:
+    if not isinstance(a, int) or not isinstance(M, int):
+        raise ValueError("Error: only integer values are allowed")
+    
+    while a < 0:
+        a += M
+
+    if a >= M:
+        a = a % M
+
+    if a == 0:
+        raise ValueError("Error: zero has no reverse element")
+
+    if a == 1:
+        return 1
+
+    q_vals = []
+    r_1 = M
+    r_2 = a
+    r_3 = 1
+    while r_3 != 0:
+        q_vals.append(int(r_1 / r_2))
+        r_3 = r_1 % r_2
+
+        r_1 = r_2
+        r_2 = r_3
+    
+    if r_1 != 1:
+        raise ValueError(f"Error: number must have no comon divisors with module while have: {r_1}")
+    
+    q_vals.pop()
+    
+    u_vals = [1, 0]
+    v_vals = [0, 1]
+    for q in q_vals:
+        u_vals.append(u_vals[-2] - u_vals[-1] * q)
+        v_vals.append(v_vals[-2] - v_vals[-1] * q)
+    
+    # print(f"q_vals: {q_vals}")
+    # print(f"u_vals: {u_vals}")
+    # print(f"v_vals: {v_vals}")
+    
+    if v_vals[-1] >= 0:
+        return v_vals[-1]
+    
+    return v_vals[-1] + M
+
 def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
     A_cur = np.array(A, copy=True)
     b_cur = np.array(b, copy=True)
@@ -91,7 +138,7 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
                 if abs(A_cur[k][j]) > big:
                     big = abs(A_cur[k][j])
                     k_row = k
-            
+
             for l in range(j, n):
                 A_cur[j][l], A_cur[k_row][l] = A_cur[k_row][l], A_cur[j][l]
 
@@ -104,17 +151,21 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
             raise ValueError("Given matrix is singular")
 
         # main part
+        # A_cur = A_cur * pivot  # multiplicate the matrix with pivot
+        # main main part
         for i in range(j + 1, n):
-            mult = A_cur[i][j] / pivot
+            # mult = A_cur[i][j] / pivot
+            mul_below = A_cur[j][j]
+            mul_up = A_cur[i][j]
 
             for l in range(j, n):
-                A_cur[i][l] = A_cur[i][l] - mult * A_cur[j][l]
+                A_cur[i][l] = mul_below * A_cur[i][l] - mul_up * A_cur[j][l]
             
-            b_cur[i] = b_cur[i] - mult * b_cur[j]
+            b_cur[i] = mul_below * b_cur[i] - mul_up * b_cur[j]
         
     return A_cur, b_cur
 
-def _gaus_backward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+def _gaus_backward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
     n = len(A)
     X = np.zeros((n, 1))
 
@@ -124,15 +175,26 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
         for j in range(i+1, n):
             sum = sum + X[j] * A[i][j]
         
-        X[i] = 1 / A[i][i] * (b[i] - sum)
+        # X[i] = 1 / A[i][i] * (b[i] - sum)
+        b_mul = (b[i] - sum) % (p-1)
+        # print(f"b_mul = {b_mul}")
+        X[i] = (reverse(int(A[i][i]), (p-1)) * b_mul) % (p-1)
     
     return X
 
-def gaus(A: np.ndarray, b: np.ndarray) -> np.ndarray:
-    A, b = _gaus_forward(A=A, b=b)
-    X = _gaus_backward(A=A, b=b)
+def gaus(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
+    # print("gaus")
+    # print(A)
+    # print(b)
+    A_c, b_c = _gaus_forward(A=A, b=b)
+    # print(A_c)
+    # print(b_c)
+    X = _gaus_backward(A=A_c, b=b_c, p=p)
 
     return X
+
+def norm_mod(a: int, m: int):
+    pass
 
 # *********************************************
 #              Project functions
@@ -219,9 +281,9 @@ def solve_equations(alpha: int, beta: int, n: int, base: list, base_r: dict, equ
         print(b)
 
         try:
-            rez = gaus(A=A, b=b)
+            rez = gaus(A=A, b=b, p=n+1)
         except ValueError as e:
-            print("Value error, continue")
+            print(e)
             continue
 
         print(f"rez = {rez}")
