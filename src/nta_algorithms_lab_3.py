@@ -1,5 +1,7 @@
 import math
 import random
+import numpy as np
+import itertools
 
 import nta_algorithms_lab_1 as lab_1
 import nta_algorithms_lab_2 as lab_2
@@ -70,6 +72,69 @@ __PRIMES__ = [
 ]
 
 # *********************************************
+#              Helpful algorithms
+# *********************************************
+
+def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+    A_cur = np.array(A, copy=True)
+    b_cur = np.array(b, copy=True)
+    
+    n = len(A_cur)
+
+    for j in range(n):
+        # if diagonal element is zero
+        if A_cur[j][j] == 0:
+            big = 0
+            k_row = j
+        
+            for k in range(j + 1, n):
+                if abs(A_cur[k][j]) > big:
+                    big = abs(A_cur[k][j])
+                    k_row = k
+            
+            for l in range(j, n):
+                A_cur[j][l], A_cur[k_row][l] = A_cur[k_row][l], A_cur[j][l]
+
+            b_cur[j], b_cur[k_row] = b_cur[k_row], b_cur[j]
+
+        pivot = A_cur[j][j]
+
+        # error case
+        if pivot == 0:
+            raise ValueError("Given matrix is singular")
+
+        # main part
+        for i in range(j + 1, n):
+            mult = A_cur[i][j] / pivot
+
+            for l in range(j, n):
+                A_cur[i][l] = A_cur[i][l] - mult * A_cur[j][l]
+            
+            b_cur[i] = b_cur[i] - mult * b_cur[j]
+        
+    return A_cur, b_cur
+
+def _gaus_backward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+    n = len(A)
+    X = np.zeros((n, 1))
+
+    for i in range(n-1, -1, -1):
+        sum = 0
+
+        for j in range(i+1, n):
+            sum = sum + X[j] * A[i][j]
+        
+        X[i] = 1 / A[i][i] * (b[i] - sum)
+    
+    return X
+
+def gaus(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+    A, b = _gaus_forward(A=A, b=b)
+    X = _gaus_backward(A=A, b=b)
+
+    return X
+
+# *********************************************
 #              Project functions
 # *********************************************
 
@@ -97,6 +162,7 @@ def get_factor_base(n: int):
 # Second step of index_calculus
 def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
     equations = list()
+    b_values = list()
     
     expected_len = len(base) + 15
     k = 1
@@ -121,22 +187,58 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
         
         if is_smooth:
             equations.append(equation)
+            b_values.append(k)
             print(f"eq = {equation}")
 
         k += 1
     
-    return equations
+    return equations, b_values
 
+# Third step of index_calculus
+def solve_equations(alpha: int, beta: int, n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
+    diff = len(equations) - len(equations[0])
+
+    # for eq in equations:
+    #     for i in range(diff):
+    #         eq.append(0)
+    
+    # for eq in equations:
+    #     print(eq)
+
+    # b = [0 for i in range(len(base))] 
+    
+    rez = None
+    for perm in itertools.permutations(zip(equations, b_values), len(base)):
+        A = list()
+        b = list()
+        for A_i, b_i in perm:
+            A.append(A_i)
+            b.append(b_i)
+
+        print(A)
+        print(b)
+
+        try:
+            rez = gaus(A=A, b=b)
+        except ValueError as e:
+            print("Value error, continue")
+            continue
+
+        print(f"rez = {rez}")
+        return rez
 
 def index_calculus(alpha: int, beta: int, n: int) -> int:
     base, base_r = get_factor_base(n=n)
     print(base)
     print(base_r)
 
-    equations = create_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r)
+    equations, b_values = create_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r)
     for eq in equations:
         print(eq)
     print("")
+
+    logs_values = solve_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
+    # print(logs_values)
 
     return 0
 
