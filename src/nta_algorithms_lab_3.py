@@ -306,19 +306,26 @@ def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_value
         l += 1
 
 def index_calculus(alpha: int, beta: int, n: int) -> int:
+    print("First step")
     base, base_r = get_factor_base(n=n)
     print(base)
     print(base_r)
 
+    print("Second step")
     equations, b_values = create_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r)
     for eq in equations:
         print(eq)
     print("")
 
-    logs_values = solve_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
+    print("Third step")
+    logs_values = solve_equations(n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
     print(f"logs_values = \n{logs_values}")
 
-    return 0
+    print("Forth step")
+    X = find_log(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, logs_values=logs_values)
+    print(f"X = {X}")
+
+    return X
 
 # **********************************************
 #                   Example
