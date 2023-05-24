@@ -258,17 +258,6 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
 
 # Third step of index_calculus
 def solve_equations(alpha: int, beta: int, n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
-    diff = len(equations) - len(equations[0])
-
-    # for eq in equations:
-    #     for i in range(diff):
-    #         eq.append(0)
-    
-    # for eq in equations:
-    #     print(eq)
-
-    # b = [0 for i in range(len(base))] 
-    
     rez = None
     for perm in itertools.permutations(zip(equations, b_values), len(base)):
         A = list()
@@ -277,16 +266,16 @@ def solve_equations(alpha: int, beta: int, n: int, base: list, base_r: dict, equ
             A.append(A_i)
             b.append(b_i)
 
-        print(A)
-        print(b)
+        # print(A)
+        # print(b)
 
         try:
             rez = gaus(A=A, b=b, p=n+1)
         except ValueError as e:
-            print(e)
+            # print(e)
             continue
 
-        print(f"rez = {rez}")
+        # print(f"rez = {rez}")
         return rez
 
 def index_calculus(alpha: int, beta: int, n: int) -> int:
@@ -300,7 +289,7 @@ def index_calculus(alpha: int, beta: int, n: int) -> int:
     print("")
 
     logs_values = solve_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
-    # print(logs_values)
+    print(f"logs_values = \n{logs_values}")
 
     return 0
 
