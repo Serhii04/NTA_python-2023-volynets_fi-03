@@ -253,7 +253,12 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
 
         a = pow(alpha, k, n + 1)
         print(f">>> {a} = pow({alpha}, {k}, {n + 1})")
-        canon_a = lab_1.get_canon_number_composition_silent(a)
+        canon_a = None
+        try:
+            canon_a = lab_1.get_canon_number_composition_silent(a)
+        except ZeroDivisionError as e:
+            print(e)
+
         print(f"{k}) {a} = {canon_a}")
         if canon_a is None:
             continue
@@ -270,6 +275,7 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
         if is_smooth:
             equations.append(equation)
             b_values.append(k)
+            print(f"canon_a = {canon_a}")
             print(f"eq = {equation}")
 
         # k += 1
@@ -340,9 +346,9 @@ def main():
     beta = 17
     p = 47
 
-    # alpha = 211693
-    # beta = 35674
-    # p = 219881
+    alpha = 13 * 5519 * 23
+    p = 3 * 11 * 5521
+    beta = pow(alpha, 189, p)
 
     # alpha = 304
     # beta = 615
