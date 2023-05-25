@@ -130,42 +130,6 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     n = len(A_cur)
     m = len(A_cur[0])
 
-    for j in range(m):
-        # if diagonal element is zero
-        if A_cur[j][j] == 0:
-            big = 0
-            k_row = j
-        
-            for k in range(j + 1, n):
-                if abs(A_cur[k][j]) > big:
-                    big = abs(A_cur[k][j])
-                    k_row = k
-
-            for c in range(j, m):
-                A_cur[j][c], A_cur[k_row][c] = A_cur[k_row][c], A_cur[j][c]
-
-            b_cur[j], b_cur[k_row] = b_cur[k_row], b_cur[j]
-
-        pivot = A_cur[j][j]
-
-        # error case
-        if pivot == 0:
-            print_matrix(A=A_cur, text="Singular matrix:")
-            raise ValueError("Given matrix is singular")
-
-        # main part
-        # A_cur = A_cur * pivot  # multiplicate the matrix with pivot
-        # main main part
-        for i in range(j + 1, n):
-            # mult = A_cur[i][j] / pivot
-            mul_below = A_cur[j][j]
-            mul_up = A_cur[i][j]
-
-            for c in range(j, m):
-                A_cur[i][c] = (mul_below * A_cur[i][c] - mul_up * A_cur[j][c]) % ord
-
-            b_cur[i] = (mul_below * b_cur[i] - mul_up * b_cur[j]) % ord
-        
     return A_cur, b_cur
 
 def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
@@ -173,17 +137,6 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     m = len(A[0])
     X = np.zeros((n, 1))
 
-    for i in range(m-1, -1, -1):
-        sum = 0
-
-        for j in range(i+1, m):
-            sum = sum + X[j] * A[i][j]
-        
-        # X[i] = 1 / A[i][i] * (b[i] - sum)
-        b_mul = (b[i] - sum) % ord
-        # print(f"b_mul = {b_mul}")
-        X[i] = (reverse(int(A[i][i]), ord) * b_mul) % ord
-    
     return X
 
 def gaus(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
@@ -347,9 +300,9 @@ def main():
     beta = 17
     p = 47
 
-    alpha = 13 * 5519 * 23
-    p = 3 * 11 * 5521
-    beta = pow(alpha, 189, p)
+    # alpha = 13 * 5519 * 23
+    # p = 3 * 11 * 5521
+    # beta = pow(alpha, 189, p)
 
     # alpha = 304
     # beta = 615
