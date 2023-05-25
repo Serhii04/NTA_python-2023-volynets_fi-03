@@ -122,7 +122,7 @@ def reverse(a: int, M: int) -> int:
     
     return v_vals[-1] + M
 
-def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+def _gaus_forward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
     A_cur = np.array(A, copy=True)
     b_cur = np.array(b, copy=True)
     
@@ -160,9 +160,9 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
             mul_up = A_cur[i][j]
 
             for c in range(j, m):
-                A_cur[i][c] = mul_below * A_cur[i][c] - mul_up * A_cur[j][c]
-            
-            b_cur[i] = mul_below * b_cur[i] - mul_up * b_cur[j]
+                A_cur[i][c] = (mul_below * A_cur[i][c] - mul_up * A_cur[j][c]) % (p-1)
+
+            b_cur[i] = (mul_below * b_cur[i] - mul_up * b_cur[j]) % (p-1)
         
     return A_cur, b_cur
 
@@ -187,7 +187,7 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
 def gaus(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
     print_matrix(A=A, rez=b, text="gaus:")
 
-    A_c, b_c = _gaus_forward(A=A, b=b)
+    A_c, b_c = _gaus_forward(A=A, b=b, p=p)
     print_matrix(A=A_c, rez=b_c, text="gaus 0.5:")
 
     X = _gaus_backward(A=A_c, b=b_c, p=p)
@@ -246,9 +246,9 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
     b_values = list()
     
     expected_len = len(base) + 15
-    k = 1
+    # k = 1
     while len(equations) < expected_len:
-        # k = random.randint(0, n-1)
+        k = random.randint(0, n-1)
 
         a = pow(alpha, k, n + 1)
         print(f">>> {a} = pow({alpha}, {k}, {n + 1})")
@@ -271,7 +271,7 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
             b_values.append(k)
             print(f"eq = {equation}")
 
-        k += 1
+        # k += 1
     
     return equations, b_values
 
