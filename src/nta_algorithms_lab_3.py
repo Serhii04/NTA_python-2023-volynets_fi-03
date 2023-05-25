@@ -179,8 +179,11 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 
         for j in range(i+1, m):
             sum = sum + X[j] * A[i][j]
-        
-        X[i] = (pow(int(A[i][i]) % ord, -1, ord) * (b[i] - sum)) % ord
+        try:
+            X[i] = (pow(int(A[i][i]) % ord, -1, ord) * (b[i] - sum)) % ord
+        except ValueError as e:
+            print(f"pow({int(A[i][i]) % ord}, -1, {ord})")
+            print(e)
 
     return X
 
@@ -191,7 +194,7 @@ def gaus(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     print_matrix(A=A_c, rez=b_c, text="gaus 0.5:")
 
     X = _gaus_backward(A=A_c, b=b_c, ord=ord)
-    print_matrix(A=X, text="gaus rez:")
+    # print_matrix(A=X, text="gaus rez:")
 
     return X
 
@@ -334,14 +337,14 @@ def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_value
 def index_calculus(alpha: int, beta: int, n: int) -> int:
     print("First step")
     base, base_r = get_factor_base(n=n)
-    print(base)
-    print(base_r)
+    # print(base)
+    # print(base_r)
 
     print("Second step")
     equations, b_values = create_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r)
-    for eq in equations:
-        print(eq)
-    print("")
+    # for eq in equations:
+    #     print(eq)
+    # print("")
 
     print("Third step")
     logs_values = solve_equations(n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
@@ -366,9 +369,9 @@ def main():
     # p = 3 * 11 * 5521
     # beta = pow(alpha, 189, p)
 
-    # alpha = 304
-    # beta = 615
-    # p = 977
+    alpha = 304
+    beta = 615
+    p = 977
 
     x = index_calculus(alpha=alpha, beta=beta, n=p-1)
 
