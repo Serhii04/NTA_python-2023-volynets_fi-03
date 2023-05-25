@@ -129,7 +129,43 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     
     n = len(A_cur)
     m = len(A_cur[0])
+    if m > n:
+        raise ValueError("Bad matrix size: {n}x{m}, where should be m <= n")
 
+    for j in range(m):
+        # if diagonal element is zero
+        if A_cur[j][j] == 0:
+            big = 0
+            k_row = j
+        
+            for k in range(j + 1, n):
+                if abs(A_cur[k][j]) > big:
+                    big = abs(A_cur[k][j])
+                    k_row = k
+            
+            for l in range(j, m):
+                A_cur[j][l], A_cur[k_row][l] = A_cur[k_row][l], A_cur[j][l]
+
+            b_cur[j], b_cur[k_row] = b_cur[k_row], b_cur[j]
+
+        pivot = A_cur[j][j]
+
+        # error case
+        if pivot == 0:
+            raise ValueError("Given matrix is singular")
+
+        # main part
+        for i in range(j + 1, n):
+            mult = A_cur[i][j] / pivot
+            d = math.gcd(A_cur[i][j], A_cur[j][j])
+            mult_upper = int(A_cur[i][j] / d)
+            mult_below = int(A_cur[j][j] / d)
+
+            for l in range(j, m):
+                A_cur[i][l] = (mult_below * A_cur[i][l] - mult_upper * A_cur[j][l]) % ord
+
+            b_cur[i] = (mult_below * b_cur[i] - mult_upper * b_cur[j]) % ord
+        
     return A_cur, b_cur
 
 def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
