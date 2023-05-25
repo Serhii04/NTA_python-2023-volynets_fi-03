@@ -150,6 +150,7 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 
         # error case
         if pivot == 0:
+            print_matrix(A=A_cur, text="Singular matrix:")
             raise ValueError("Given matrix is singular")
 
         # main part
