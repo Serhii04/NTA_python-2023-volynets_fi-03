@@ -275,7 +275,24 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
 
 # Third step of index_calculus
 def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
-    rez = gaus(A=equations, b=b_values, ord=n)
+    # rez = gaus(A=equations, b=b_values, ord=n)
+    # return rez
+
+    canon_n = lab_1.get_canon_number_composition_silent(n=n)
+
+    n_primes = collections.defaultdict(lambda: 1)
+    for n_i in canon_n:
+        n_primes[n_i] *= n_i
+    
+    print(f"keys = {n_primes.keys()}")
+    print(f"values = {n_primes.values()}")
+
+    partial_moduls = n_primes.values()
+    partial_rez = list()
+    for cur_mod in partial_moduls:
+        partial_rez.append(gaus(A=equations, b=b_values, ord=cur_mod))
+
+    rez = lab_2.Chinese_remainder_theorem(a_list=partial_rez, mod_list=partial_moduls)
 
     return rez
 
