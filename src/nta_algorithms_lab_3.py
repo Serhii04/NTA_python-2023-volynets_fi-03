@@ -157,7 +157,6 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 
         # main part
         for i in range(j + 1, n):
-            mult = A_cur[i][j] / pivot
             d = math.gcd(A_cur[i][j], A_cur[j][j])
             mult_upper = int(A_cur[i][j] / d)
             mult_below = int(A_cur[j][j] / d)
@@ -179,11 +178,23 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 
         for j in range(i+1, m):
             sum = sum + X[j] * A[i][j]
+        
+        sum = (b[i] - sum) % ord
+        d = math.gcd(int(A[i][i]), ord)
+
+        if sum % d != 0:
+            raise ValueError("AHTUNG!!!")
+
         try:
-            X[i] = (pow(int(A[i][i]) % ord, -1, ord) * (b[i] - sum)) % ord
+            X[i] = (pow(int(A[i][i] / d), -1, int(ord / d)) * (sum/d)) % ord
         except ValueError as e:
-            print(f"pow({int(A[i][i]) % ord}, -1, {ord})")
+            print(f"a = {int(A[i][i])}, ord = {ord}")
+            print(f"pow({int(A[i][i] / d)}, -1, {ord / d})")
             print(e)
+
+    # rez_X = list()
+    # for i in range(d):
+    #     rez_X.append(X + d*i)
 
     return X
 
@@ -304,6 +315,8 @@ def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values:
         partial_rez.append(gaus(A=equations, b=b_values, ord=cur_mod))
 
     rez = lab_2.Chinese_remainder_theorem(a_list=partial_rez, mod_list=partial_moduls)
+
+    # TODO: write adecwatte algorithmo
 
     return rez
 
