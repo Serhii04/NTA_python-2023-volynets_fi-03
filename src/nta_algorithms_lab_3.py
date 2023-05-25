@@ -274,8 +274,8 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
         if is_smooth:
             equations.append(equation)
             b_values.append(k)
-            print(f"canon_a = {canon_a}")
-            print(f"eq = {equation}")
+            # print(f"canon_a = {canon_a}")
+            # print(f"eq = {equation}")
 
         # k += 1
     
