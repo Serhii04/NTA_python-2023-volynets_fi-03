@@ -172,7 +172,15 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     n = len(A)
     m = len(A[0])
-    X = np.zeros((n, 1))
+    X = np.zeros((m, 1))
+
+    for i in range(m-1, -1, -1):
+        sum = 0
+
+        for j in range(i+1, m):
+            sum = sum + X[j] * A[i][j]
+        
+        X[i] = (pow(int(A[i][i]) % ord, -1, ord) * (b[i] - sum)) % ord
 
     return X
 
