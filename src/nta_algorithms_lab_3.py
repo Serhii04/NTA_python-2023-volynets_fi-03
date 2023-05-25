@@ -122,7 +122,7 @@ def reverse(a: int, M: int) -> int:
     
     return v_vals[-1] + M
 
-def _gaus_forward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
+def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     A_cur = np.array(A, copy=True)
     b_cur = np.array(b, copy=True)
     
@@ -160,13 +160,13 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
             mul_up = A_cur[i][j]
 
             for c in range(j, m):
-                A_cur[i][c] = (mul_below * A_cur[i][c] - mul_up * A_cur[j][c]) % (p-1)
+                A_cur[i][c] = (mul_below * A_cur[i][c] - mul_up * A_cur[j][c]) % ord
 
-            b_cur[i] = (mul_below * b_cur[i] - mul_up * b_cur[j]) % (p-1)
+            b_cur[i] = (mul_below * b_cur[i] - mul_up * b_cur[j]) % ord
         
     return A_cur, b_cur
 
-def _gaus_backward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
+def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     n = len(A)
     m = len(A[0])
     X = np.zeros((n, 1))
@@ -178,19 +178,19 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
             sum = sum + X[j] * A[i][j]
         
         # X[i] = 1 / A[i][i] * (b[i] - sum)
-        b_mul = (b[i] - sum) % (p-1)
+        b_mul = (b[i] - sum) % ord
         # print(f"b_mul = {b_mul}")
-        X[i] = (reverse(int(A[i][i]), (p-1)) * b_mul) % (p-1)
+        X[i] = (reverse(int(A[i][i]), ord) * b_mul) % ord
     
     return X
 
-def gaus(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
+def gaus(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     print_matrix(A=A, rez=b, text="gaus:")
 
-    A_c, b_c = _gaus_forward(A=A, b=b, p=p)
+    A_c, b_c = _gaus_forward(A=A, b=b, ord=ord)
     print_matrix(A=A_c, rez=b_c, text="gaus 0.5:")
 
-    X = _gaus_backward(A=A_c, b=b_c, p=p)
+    X = _gaus_backward(A=A_c, b=b_c, ord=ord)
     print_matrix(A=X, text="gaus rez:")
 
     return X
@@ -277,7 +277,7 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
 
 # Third step of index_calculus
 def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
-    rez = gaus(A=equations, b=b_values, p=n+1)
+    rez = gaus(A=equations, b=b_values, ord=n)
 
     return rez
 
