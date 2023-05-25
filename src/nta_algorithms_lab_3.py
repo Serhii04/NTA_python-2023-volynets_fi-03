@@ -2,6 +2,7 @@ import math
 import random
 import numpy as np
 import itertools
+import collections
 
 import nta_algorithms_lab_1 as lab_1
 import nta_algorithms_lab_2 as lab_2
