@@ -281,26 +281,6 @@ def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values:
 
     return rez
 
-    rez = None
-    for perm in itertools.permutations(zip(equations, b_values), len(base)):
-        A = list()
-        b = list()
-        for A_i, b_i in perm:
-            A.append(A_i)
-            b.append(b_i)
-
-        # print(A)
-        # print(b)
-
-        try:
-            rez = gaus(A=A, b=b, p=n+1)
-        except ValueError as e:
-            # print(e)
-            continue
-
-        # print(f"rez = {rez}")
-        return rez
-
 # Forth step of index_calculus
 def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_values: list) -> int:
     l = 0
