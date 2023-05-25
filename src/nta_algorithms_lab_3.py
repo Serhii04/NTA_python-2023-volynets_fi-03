@@ -251,14 +251,14 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
         k = random.randint(0, n-1)
 
         a = pow(alpha, k, n + 1)
-        print(f">>> {a} = pow({alpha}, {k}, {n + 1})")
+        # print(f">>> {a} = pow({alpha}, {k}, {n + 1})")
         canon_a = None
         try:
             canon_a = lab_1.get_canon_number_composition_silent(a)
         except ZeroDivisionError as e:
             print(e)
 
-        print(f"{k}) {a} = {canon_a}")
+        # print(f"{k}) {a} = {canon_a}")
         if canon_a is None:
             continue
 
