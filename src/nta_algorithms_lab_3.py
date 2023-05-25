@@ -127,8 +127,9 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
     b_cur = np.array(b, copy=True)
     
     n = len(A_cur)
+    m = len(A_cur[0])
 
-    for j in range(n):
+    for j in range(m):
         # if diagonal element is zero
         if A_cur[j][j] == 0:
             big = 0
@@ -139,8 +140,8 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
                     big = abs(A_cur[k][j])
                     k_row = k
 
-            for l in range(j, n):
-                A_cur[j][l], A_cur[k_row][l] = A_cur[k_row][l], A_cur[j][l]
+            for c in range(j, m):
+                A_cur[j][c], A_cur[k_row][c] = A_cur[k_row][c], A_cur[j][c]
 
             b_cur[j], b_cur[k_row] = b_cur[k_row], b_cur[j]
 
@@ -158,8 +159,8 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
             mul_below = A_cur[j][j]
             mul_up = A_cur[i][j]
 
-            for l in range(j, n):
-                A_cur[i][l] = mul_below * A_cur[i][l] - mul_up * A_cur[j][l]
+            for c in range(j, m):
+                A_cur[i][c] = mul_below * A_cur[i][c] - mul_up * A_cur[j][c]
             
             b_cur[i] = mul_below * b_cur[i] - mul_up * b_cur[j]
         
@@ -167,12 +168,13 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 def _gaus_backward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
     n = len(A)
+    m = len(A[0])
     X = np.zeros((n, 1))
 
-    for i in range(n-1, -1, -1):
+    for i in range(m-1, -1, -1):
         sum = 0
 
-        for j in range(i+1, n):
+        for j in range(i+1, m):
             sum = sum + X[j] * A[i][j]
         
         # X[i] = 1 / A[i][i] * (b[i] - sum)
@@ -183,18 +185,35 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
     return X
 
 def gaus(A: np.ndarray, b: np.ndarray, p: int) -> np.ndarray:
-    # print("gaus")
-    # print(A)
-    # print(b)
+    print_matrix(A=A, rez=b, text="gaus:")
+
     A_c, b_c = _gaus_forward(A=A, b=b)
-    # print(A_c)
-    # print(b_c)
+    print_matrix(A=A_c, rez=b_c, text="gaus 0.5:")
+
     X = _gaus_backward(A=A_c, b=b_c, p=p)
+    print_matrix(A=X, text="gaus rez:")
 
     return X
 
 def norm_mod(a: int, m: int):
     pass
+
+# *********************************************
+#              Print functions
+# *********************************************
+
+def print_matrix(A: np.ndarray, rez: np.ndarray=None, text: str=None) -> None:
+    if text is not None:
+        print(text)
+    
+    if rez is not None:
+        for A_i, b_i in zip(A, rez):
+            print(f"{A_i} = {b_i}")
+    else:
+        for A_i in A:
+            print(f"{A_i}")
+
+
 
 # *********************************************
 #              Project functions
@@ -258,6 +277,10 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
 
 # Third step of index_calculus
 def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
+    rez = gaus(A=equations, b=b_values, p=n+1)
+
+    return rez
+
     rez = None
     for perm in itertools.permutations(zip(equations, b_values), len(base)):
         A = list()
@@ -335,6 +358,14 @@ def main():
     alpha = 10
     beta = 17
     p = 47
+
+    # alpha = 211693
+    # beta = 35674
+    # p = 219881
+
+    # alpha = 304
+    # beta = 615
+    # p = 977
 
     x = index_calculus(alpha=alpha, beta=beta, n=p-1)
 
