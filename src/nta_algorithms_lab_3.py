@@ -386,11 +386,22 @@ def main():
     beta = 615
     p = 977
 
-    x = index_calculus(alpha=alpha, beta=beta, n=p-1)
+    temp_rezs = list()
 
-    print(f"x = {x}")
+    for i in range(10):
+        try:
+            x = index_calculus(alpha=alpha, beta=beta, n=p-1)
+            temp_rezs.append(x)
+        except ValueError as e:
+            print(e)
 
-    return 0
+    for x in temp_rezs:
+        if pow(alpha, int(x[0]), p) == beta:
+            print(f"x = {x}")
+            return x[0]
+
+
+    return -1
 
 if __name__ == "__main__":
     main()
