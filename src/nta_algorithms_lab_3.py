@@ -386,6 +386,10 @@ def main():
     beta = 615
     p = 977
 
+    alpha = 211693
+    beta = 35674
+    p = 219881
+
     temp_rezs = list()
 
     for i in range(10):
