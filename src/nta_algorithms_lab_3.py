@@ -3,6 +3,7 @@ import random
 import numpy as np
 import itertools
 import collections
+import copy
 
 import nta_algorithms_lab_1 as lab_1
 import nta_algorithms_lab_2 as lab_2
@@ -152,7 +153,7 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 
         # error case
         if pivot == 0:
-            print_matrix(A=A_cur, text="Singular matrix:")
+            # print_matrix(A=A_cur, text="Singular matrix:")
             raise ValueError("Given matrix is singular")
 
         # main part
@@ -171,7 +172,7 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     n = len(A)
     m = len(A[0])
-    X = np.zeros((m, 1))
+    X = np.zeros((m))
 
     for i in range(m-1, -1, -1):
         sum = 0
@@ -183,26 +184,26 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
         d = math.gcd(int(A[i][i]), ord)
 
         if sum % d != 0:
-            raise ValueError("AHTUNG!!!")
+            raise ValueError("No solution!!!")
 
         try:
-            X[i] = (pow(int(A[i][i] / d), -1, int(ord / d)) * (sum/d)) % ord
+            X[i] = int((pow(int(A[i][i] / d), -1, int(ord / d)) * (sum/d)) % ord)
         except ValueError as e:
-            print(f"a = {int(A[i][i])}, ord = {ord}")
-            print(f"pow({int(A[i][i] / d)}, -1, {ord / d})")
+            # print(f"a = {int(A[i][i])}, ord = {ord}")
+            # print(f"pow({int(A[i][i] / d)}, -1, {ord / d})")
             print(e)
 
-    # rez_X = list()
-    # for i in range(d):
-    #     rez_X.append(X + d*i)
+    rez_X = list()
+    for i in range(d):
+        rez_X.append(X + d*i)
 
-    return X
+    return rez_X
 
 def gaus(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
-    print_matrix(A=A, rez=b, text="gaus:")
+    # print_matrix(A=A, rez=b, text="gaus:")
 
     A_c, b_c = _gaus_forward(A=A, b=b, ord=ord)
-    print_matrix(A=A_c, rez=b_c, text="gaus 0.5:")
+    # print_matrix(A=A_c, rez=b_c, text="gaus 0.5:")
 
     X = _gaus_backward(A=A_c, b=b_c, ord=ord)
     # print_matrix(A=X, text="gaus rez:")
@@ -241,7 +242,7 @@ def get_factor_base(n: int):
     base_r = dict()
 
     max_val = __C__ * math.exp(0.5 * math.sqrt(math.log(n) * math.log(math.log(n))));
-    print(f"max_val = {max_val}");
+    # print(f"max_val = {max_val}");
 
     for p in __PRIMES__:
         if(p >= max_val):
@@ -259,7 +260,7 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
     equations = list()
     b_values = list()
     
-    expected_len = len(base) + 15
+    expected_len = len(base) + 30
     # k = 1
     while len(equations) < expected_len:
         k = random.randint(0, n-1)
@@ -306,19 +307,38 @@ def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values:
     for n_i in canon_n:
         n_primes[n_i] *= n_i
     
-    print(f"keys = {n_primes.keys()}")
-    print(f"values = {n_primes.values()}")
+    # print(f"keys = {n_primes.keys()}")
+    # print(f"values = {n_primes.values()}")
 
     partial_moduls = n_primes.values()
-    partial_rez = list()
-    for cur_mod in partial_moduls:
-        partial_rez.append(gaus(A=equations, b=b_values, ord=cur_mod))
+    tables_for_check = list()
 
-    rez = lab_2.Chinese_remainder_theorem(a_list=partial_rez, mod_list=partial_moduls)
+    for mod in partial_moduls:
+        temp_log_values = gaus(A=equations, b=b_values, ord=mod)
 
-    # TODO: write adecwatte algorithmo
+        if len(tables_for_check) == 0:
+            for log_values in temp_log_values:
+                tables_for_check.append(np.array([log_values]))
+        else:
+            tables_for_check_past = copy.deepcopy(tables_for_check)
+            tables_for_check = list()
 
-    return rez
+            for log_values in temp_log_values:
+                cur_cur_table = copy.deepcopy(tables_for_check_past)
+                for i, table_i in enumerate(cur_cur_table):
+                    # table.append(log_values)
+                    cur_cur_table = np.append(table_i, [log_values], axis=0)
+
+                tables_for_check.append(cur_cur_table)
+        
+        # print(f"temp_log_values")
+        # print_matrix(tables_for_check)
+
+    log_solutions = list()
+    for table_i in tables_for_check:
+        log_solutions.append(lab_2.Chinese_remainder_theorem(a_list=table_i, mod_list=partial_moduls))
+
+    return log_solutions
 
 # Forth step of index_calculus
 def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_values: list) -> int:
@@ -326,10 +346,10 @@ def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_value
     while True:
         is_smooth = True
         a = beta * pow(alpha, l, n + 1) % (n + 1)
-        print(f">>> {a} = pow({alpha}, {l}, {n + 1})")
+        # print(f">>> {a} = pow({alpha}, {l}, {n + 1})")
         
         canon_a = lab_1.get_canon_number_composition_silent(a)
-        print(f"{l}) {a} = {canon_a}")
+        # print(f"{l}) {a} = {canon_a}")
         
         if canon_a is None:
             is_smooth = False
@@ -360,14 +380,18 @@ def index_calculus(alpha: int, beta: int, n: int) -> int:
     # print("")
 
     print("Third step")
-    logs_values = solve_equations(n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
-    print(f"logs_values = \n{logs_values}")
+    log_solutions = solve_equations(n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
+    print(f"logs_values = \n{log_solutions}")
 
     print("Forth step")
-    X = find_log(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, logs_values=logs_values)
-    print(f"X = {X}")
+    for logs_values in log_solutions:
+        x = int(find_log(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, logs_values=logs_values))
+        if pow(alpha, x, n + 1) == beta:
+            return x
+    
+    print(f"No solution")
 
-    return X
+    return
 
 # **********************************************
 #                   Example
@@ -386,23 +410,27 @@ def main():
     beta = 615
     p = 977
 
-    alpha = 211693
-    beta = 35674
-    p = 219881
+    alpha = 469727668
+    beta = 361909909
+    p = 624411923
 
-    temp_rezs = list()
+    x = index_calculus(alpha=alpha, beta=beta, n=p-1)
 
-    for i in range(10):
-        try:
-            x = index_calculus(alpha=alpha, beta=beta, n=p-1)
-            temp_rezs.append(x)
-        except ValueError as e:
-            print(e)
+    print(f"answ = {x}")
 
-    for x in temp_rezs:
-        if pow(alpha, int(x[0]), p) == beta:
-            print(f"x = {x}")
-            return x[0]
+    # temp_rezs = list()
+
+    # for i in range(10):
+    #     try:
+    #         x = index_calculus(alpha=alpha, beta=beta, n=p-1)
+    #         temp_rezs.append(x)
+    #     except ValueError as e:
+    #         print(e)
+
+    # for x in temp_rezs:
+    #     if pow(alpha, int(x[0]), p) == beta:
+    #         print(f"x = {x}")
+    #         return x[0]
 
 
     return -1
