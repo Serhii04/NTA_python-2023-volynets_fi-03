@@ -209,8 +209,44 @@ def gaus(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 
     return X
 
-def norm_mod(a: int, m: int):
-    pass
+def copersmith_karmakar(A: np.ndarray, y: np.ndarray, mod: int):
+    N = len(A)
+    print(f"A = \n{A}")
+    print(f"y = \n{A}")
+    print(f"N = {N}")
+
+    # x = np.random.randint(mod, size=N)
+    x = np.ones(N)
+
+    P = y - np.matmul(A, x)
+    r = np.array(P, copy=True)
+
+    for i in range(N-1):
+        a = np.dot(r, r) / np.dot(P, np.matmul(A, P))
+        x = x + a * P
+        r_prew = r
+        r = r - a * np.matmul(A, P)
+        b = np.matmul(r, r) / np.matmul(r_prew, r_prew)
+        P = r + b * P
+
+    return x
+
+def Wiedemann(A: np.ndarray, y: np.ndarray, mod: int) -> np.ndarray:
+    N = len(A)
+    K = 10
+
+    v_i = list()
+    
+    # A_i = np.array(A, coppy=True)
+    # A_i = np.identity(N)
+    temp = np.matmul(np.identity(N), y)
+    for i in range(2 * N):
+        v_i.append(temp[0, K])
+        temp = np.matmul(A, temp)
+
+
+
+
 
 # *********************************************
 #              Print functions
@@ -295,28 +331,41 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
     
     return equations, b_values
 
+def solve_equations_v_1(n: int, base: list, base_r: dict, B: np.ndarray, y: np.ndarray) -> np.ndarray:
+    # we have: equations * X = b_values
+    B_T = B.transpose()
+
+    A = np.matmul(B_T, B)
+    z = np.matmul(B_T, y)
+
+    rez = copersmith_karmakar(A=A, y=z, mod=n)
+
+    print(f"rez =\n{rez}")
+
+    return rez
+
+def solve_equations_v_2_Wiedemann(n: int, base: list, base_r: dict, A: np.ndarray, b: np.ndarray) -> np.ndarray:
+    # A_T = A.transpose()
+
+    # B = np.matmul(A_T, A)
+    # z = np.matmul(A_T, b)
+
+    # rez = Wiedemann(A=B, y=z, mod=n)
+
+    rez = Wiedemann(A=A, y=b, mod=n)
+
+    print(f"rez =\n{rez}")
+
+    return rez
+
+
 # Third step of index_calculus
-def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
-    # rez = gaus(A=equations, b=b_values, ord=n)
-    # return rez
+def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values: list) -> np.ndarray:
+    A = np.array(equations)
+    b = np.array(b_values)
 
-    canon_n = lab_1.get_canon_number_composition_silent(n=n)
-
-    n_primes = collections.defaultdict(lambda: 1)
-    for n_i in canon_n:
-        n_primes[n_i] *= n_i
-    
-    print(f"keys = {n_primes.keys()}")
-    print(f"values = {n_primes.values()}")
-
-    partial_moduls = n_primes.values()
-    partial_rez = list()
-    for cur_mod in partial_moduls:
-        partial_rez.append(gaus(A=equations, b=b_values, ord=cur_mod))
-
-    rez = lab_2.Chinese_remainder_theorem(a_list=partial_rez, mod_list=partial_moduls)
-
-    # TODO: write adecwatte algorithmo
+    # rez = solve_equations_v_2_Wiedemann(n, base, base_r, A, b)
+    rez = solve_equations_v_1(n, base, base_r, A, b)
 
     return rez
 
@@ -390,19 +439,24 @@ def main():
     beta = 35674
     p = 219881
 
-    temp_rezs = list()
+    x = index_calculus(alpha=alpha, beta=beta, n=p-1)
 
-    for i in range(10):
-        try:
-            x = index_calculus(alpha=alpha, beta=beta, n=p-1)
-            temp_rezs.append(x)
-        except ValueError as e:
-            print(e)
+    print(f"x = \n{x}")
 
-    for x in temp_rezs:
-        if pow(alpha, int(x[0]), p) == beta:
-            print(f"x = {x}")
-            return x[0]
+
+    # temp_rezs = list()
+
+    # for i in range(10):
+    #     try:
+    #         x = index_calculus(alpha=alpha, beta=beta, n=p-1)
+    #         temp_rezs.append(x)
+    #     except ValueError as e:
+    #         print(e)
+
+    # for x in temp_rezs:
+    #     if pow(alpha, int(x[0]), p) == beta:
+    #         print(f"x = {x}")
+    #         return x[0]
 
 
     return -1
