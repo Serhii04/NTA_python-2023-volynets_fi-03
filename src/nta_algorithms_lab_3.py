@@ -206,7 +206,8 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
         try:
             X[i] = int((pow(int(A[i][i] / d), -1, int(ord / d)) * (sum/d)) % ord)
         except ValueError as e:
-            print(e)
+            # print(e)
+            pass
 
     rez_X = list()
     for i in range(d):
@@ -279,7 +280,8 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict, ex
         try:
             canon_a = lab_1.get_canon_number_composition_silent(a)
         except ZeroDivisionError as e:
-            print(e)
+            # print(e)
+            pass
 
         if canon_a is None:
             continue
@@ -314,7 +316,8 @@ def create_equations_multiproces(alpha: int, beta: int, n: int, base: list, base
         try:
             canon_a = lab_1.get_canon_number_composition_silent(a)
         except ZeroDivisionError as e:
-            print(e)
+            # print(e)
+            pass
 
         if canon_a is None:
             continue
