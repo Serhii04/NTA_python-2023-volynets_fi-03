@@ -115,10 +115,6 @@ def reverse(a: int, M: int) -> int:
         u_vals.append(u_vals[-2] - u_vals[-1] * q)
         v_vals.append(v_vals[-2] - v_vals[-1] * q)
     
-    # print(f"q_vals: {q_vals}")
-    # print(f"u_vals: {u_vals}")
-    # print(f"v_vals: {v_vals}")
-    
     if v_vals[-1] >= 0:
         return v_vals[-1]
     
@@ -153,7 +149,6 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 
         # error case
         if pivot == 0:
-            # print_matrix(A=A_cur, text="Singular matrix:")
             raise ValueError("Given matrix is singular")
 
         # main part
@@ -189,8 +184,6 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
         try:
             X[i] = int((pow(int(A[i][i] / d), -1, int(ord / d)) * (sum/d)) % ord)
         except ValueError as e:
-            # print(f"a = {int(A[i][i])}, ord = {ord}")
-            # print(f"pow({int(A[i][i] / d)}, -1, {ord / d})")
             print(e)
 
     rez_X = list()
@@ -200,18 +193,11 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     return rez_X
 
 def gaus(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
-    # print_matrix(A=A, rez=b, text="gaus:")
-
     A_c, b_c = _gaus_forward(A=A, b=b, ord=ord)
-    # print_matrix(A=A_c, rez=b_c, text="gaus 0.5:")
 
     X = _gaus_backward(A=A_c, b=b_c, ord=ord)
-    # print_matrix(A=X, text="gaus rez:")
 
     return X
-
-def norm_mod(a: int, m: int):
-    pass
 
 # *********************************************
 #              Print functions
@@ -242,7 +228,6 @@ def get_factor_base(n: int):
     base_r = dict()
 
     max_val = __C__ * math.exp(0.5 * math.sqrt(math.log(n) * math.log(math.log(n))));
-    # print(f"max_val = {max_val}");
 
     for p in __PRIMES__:
         if(p >= max_val):
@@ -266,14 +251,12 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
         k = random.randint(0, n-1)
 
         a = pow(alpha, k, n + 1)
-        # print(f">>> {a} = pow({alpha}, {k}, {n + 1})")
         canon_a = None
         try:
             canon_a = lab_1.get_canon_number_composition_silent(a)
         except ZeroDivisionError as e:
             print(e)
 
-        # print(f"{k}) {a} = {canon_a}")
         if canon_a is None:
             continue
 
@@ -289,27 +272,17 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
         if is_smooth:
             equations.append(equation)
             b_values.append(k)
-            # print(f"canon_a = {canon_a}")
-            # print(f"eq = {equation}")
 
-        # k += 1
-    
     return equations, b_values
 
 # Third step of index_calculus
 def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
-    # rez = gaus(A=equations, b=b_values, ord=n)
-    # return rez
-
     canon_n = lab_1.get_canon_number_composition_silent(n=n)
 
     n_primes = collections.defaultdict(lambda: 1)
     for n_i in canon_n:
         n_primes[n_i] *= n_i
     
-    # print(f"keys = {n_primes.keys()}")
-    # print(f"values = {n_primes.values()}")
-
     partial_moduls = n_primes.values()
     tables_for_check = list()
 
@@ -326,13 +299,9 @@ def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values:
             for log_values in temp_log_values:
                 cur_cur_table = copy.deepcopy(tables_for_check_past)
                 for i, table_i in enumerate(cur_cur_table):
-                    # table.append(log_values)
                     cur_cur_table = np.append(table_i, [log_values], axis=0)
 
                 tables_for_check.append(cur_cur_table)
-        
-        # print(f"temp_log_values")
-        # print_matrix(tables_for_check)
 
     log_solutions = list()
     for table_i in tables_for_check:
@@ -346,10 +315,8 @@ def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_value
     while True:
         is_smooth = True
         a = beta * pow(alpha, l, n + 1) % (n + 1)
-        # print(f">>> {a} = pow({alpha}, {l}, {n + 1})")
         
         canon_a = lab_1.get_canon_number_composition_silent(a)
-        # print(f"{l}) {a} = {canon_a}")
         
         if canon_a is None:
             is_smooth = False
@@ -370,18 +337,12 @@ def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_value
 def index_calculus(alpha: int, beta: int, n: int) -> int:
     print("First step")
     base, base_r = get_factor_base(n=n)
-    # print(base)
-    # print(base_r)
 
     print("Second step")
     equations, b_values = create_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r)
-    # for eq in equations:
-    #     print(eq)
-    # print("")
 
     print("Third step")
     log_solutions = solve_equations(n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
-    print(f"logs_values = \n{log_solutions}")
 
     print("Forth step")
     for logs_values in log_solutions:
@@ -410,30 +371,13 @@ def main():
     beta = 615
     p = 977
 
-    alpha = 469727668
-    beta = 361909909
-    p = 624411923
+    # alpha = 469727668
+    # beta = 361909909
+    # p = 624411923
 
     x = index_calculus(alpha=alpha, beta=beta, n=p-1)
 
     print(f"answ = {x}")
-
-    # temp_rezs = list()
-
-    # for i in range(10):
-    #     try:
-    #         x = index_calculus(alpha=alpha, beta=beta, n=p-1)
-    #         temp_rezs.append(x)
-    #     except ValueError as e:
-    #         print(e)
-
-    # for x in temp_rezs:
-    #     if pow(alpha, int(x[0]), p) == beta:
-    #         print(f"x = {x}")
-    #         return x[0]
-
-
-    return -1
 
 if __name__ == "__main__":
     main()
