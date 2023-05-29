@@ -3,10 +3,33 @@ import random
 import numpy as np
 import itertools
 import collections
+import copy
+import signal
+from contextlib import contextmanager
+from multiprocessing import Process, Value, Array, Manager, Pool
+import os
 
 import nta_algorithms_lab_1 as lab_1
 import nta_algorithms_lab_2 as lab_2
 import my_timer
+
+
+# *********************************************
+#       help functions to time limit
+# *********************************************
+
+@contextmanager
+def time_limit(seconds):
+    def signal_handler(signum, frame):
+        raise UserWarning("Timed out!")
+    
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(seconds)
+    
+    try:
+        yield
+    finally:
+        signal.alarm(0)
 
 # *********************************************
 #              Project const values
@@ -114,10 +137,6 @@ def reverse(a: int, M: int) -> int:
         u_vals.append(u_vals[-2] - u_vals[-1] * q)
         v_vals.append(v_vals[-2] - v_vals[-1] * q)
     
-    # print(f"q_vals: {q_vals}")
-    # print(f"u_vals: {u_vals}")
-    # print(f"v_vals: {v_vals}")
-    
     if v_vals[-1] >= 0:
         return v_vals[-1]
     
@@ -152,7 +171,6 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 
         # error case
         if pivot == 0:
-            print_matrix(A=A_cur, text="Singular matrix:")
             raise ValueError("Given matrix is singular")
 
         # main part
@@ -171,7 +189,7 @@ def _gaus_forward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
 def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
     n = len(A)
     m = len(A[0])
-    X = np.zeros((m, 1))
+    X = np.zeros((m))
 
     for i in range(m-1, -1, -1):
         sum = 0
@@ -183,34 +201,26 @@ def _gaus_backward(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
         d = math.gcd(int(A[i][i]), ord)
 
         if sum % d != 0:
-            raise ValueError("AHTUNG!!!")
+            raise ValueError("No solution!!!")
 
         try:
-            X[i] = (pow(int(A[i][i] / d), -1, int(ord / d)) * (sum/d)) % ord
+            X[i] = int((pow(int(A[i][i] / d), -1, int(ord / d)) * (sum/d)) % ord)
         except ValueError as e:
-            print(f"a = {int(A[i][i])}, ord = {ord}")
-            print(f"pow({int(A[i][i] / d)}, -1, {ord / d})")
-            print(e)
+            # print(e)
+            pass
 
-    # rez_X = list()
-    # for i in range(d):
-    #     rez_X.append(X + d*i)
+    rez_X = list()
+    for i in range(d):
+        rez_X.append(X + d*i)
 
-    return X
+    return rez_X
 
 def gaus(A: np.ndarray, b: np.ndarray, ord: int) -> np.ndarray:
-    print_matrix(A=A, rez=b, text="gaus:")
-
     A_c, b_c = _gaus_forward(A=A, b=b, ord=ord)
-    print_matrix(A=A_c, rez=b_c, text="gaus 0.5:")
 
     X = _gaus_backward(A=A_c, b=b_c, ord=ord)
-    # print_matrix(A=X, text="gaus rez:")
 
     return X
-
-def norm_mod(a: int, m: int):
-    pass
 
 # *********************************************
 #              Print functions
@@ -241,7 +251,6 @@ def get_factor_base(n: int):
     base_r = dict()
 
     max_val = __C__ * math.exp(0.5 * math.sqrt(math.log(n) * math.log(math.log(n))));
-    print(f"max_val = {max_val}");
 
     for p in __PRIMES__:
         if(p >= max_val):
@@ -255,24 +264,25 @@ def get_factor_base(n: int):
     return base, base_r
 
 # Second step of index_calculus
-def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
+def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict, expected_len: int=None):
     equations = list()
     b_values = list()
     
-    expected_len = len(base) + 15
+    if expected_len is None:
+        expected_len = 3 * len(base)  # + 30
+
     # k = 1
     while len(equations) < expected_len:
         k = random.randint(0, n-1)
 
         a = pow(alpha, k, n + 1)
-        # print(f">>> {a} = pow({alpha}, {k}, {n + 1})")
         canon_a = None
         try:
             canon_a = lab_1.get_canon_number_composition_silent(a)
         except ZeroDivisionError as e:
-            print(e)
+            # print(e)
+            pass
 
-        # print(f"{k}) {a} = {canon_a}")
         if canon_a is None:
             continue
 
@@ -288,37 +298,89 @@ def create_equations(alpha: int, beta: int, n: int, base: list, base_r: dict):
         if is_smooth:
             equations.append(equation)
             b_values.append(k)
-            # print(f"canon_a = {canon_a}")
-            # print(f"eq = {equation}")
 
-        # k += 1
+    return equations, b_values
+
+def create_equations_multiproces(alpha: int, beta: int, n: int, base: list, base_r: dict, from_, to_):
+    equations = list()
+    b_values = list()
     
+    expected_len = 2 * (to_ - from_)
+
+    # k = 1
+    while len(equations) < expected_len:
+        k = random.randint(0, n-1)
+
+        a = pow(alpha, k, n + 1)
+        canon_a = None
+        try:
+            canon_a = lab_1.get_canon_number_composition_silent(a)
+        except ZeroDivisionError as e:
+            # print(e)
+            pass
+
+        if canon_a is None:
+            continue
+
+        equation = [0 for i in range(len(base))]
+        is_smooth = True
+        for a_i in canon_a:
+            if a_i not in base:
+                is_smooth = False
+                break
+
+            equation[base_r[a_i]] += 1
+        
+        if is_smooth:
+            equations.append(equation)
+            b_values.append(k)
+
+    # # for i, b in enumerate(b_values):
+    # #     arr_b[i + from_] = b
+    # #     for j in range(len(base)):
+    # #         arr_e[i + from_ + j] = equations[i][j]
+    # for i in range(from_, to_):
+    #     arr_b[i].append(b_values[i - from_])
+    #     arr_e[i].append(equation[i - from_])
+
+
+    # # print(f">>{equations}\n>>{b_values}")
+
     return equations, b_values
 
 # Third step of index_calculus
 def solve_equations(n: int, base: list, base_r: dict, equations: list, b_values: list) -> list:
-    # rez = gaus(A=equations, b=b_values, ord=n)
-    # return rez
-
     canon_n = lab_1.get_canon_number_composition_silent(n=n)
 
     n_primes = collections.defaultdict(lambda: 1)
     for n_i in canon_n:
         n_primes[n_i] *= n_i
     
-    print(f"keys = {n_primes.keys()}")
-    print(f"values = {n_primes.values()}")
-
     partial_moduls = n_primes.values()
-    partial_rez = list()
-    for cur_mod in partial_moduls:
-        partial_rez.append(gaus(A=equations, b=b_values, ord=cur_mod))
+    tables_for_check = list()
 
-    rez = lab_2.Chinese_remainder_theorem(a_list=partial_rez, mod_list=partial_moduls)
+    for mod in partial_moduls:
+        temp_log_values = gaus(A=equations, b=b_values, ord=mod)
 
-    # TODO: write adecwatte algorithmo
+        if len(tables_for_check) == 0:
+            for log_values in temp_log_values:
+                tables_for_check.append(np.array([log_values]))
+        else:
+            tables_for_check_past = copy.deepcopy(tables_for_check)
+            tables_for_check = list()
 
-    return rez
+            for log_values in temp_log_values:
+                cur_cur_table = copy.deepcopy(tables_for_check_past)
+                for i, table_i in enumerate(cur_cur_table):
+                    cur_cur_table = np.append(table_i, [log_values], axis=0)
+
+                tables_for_check.append(cur_cur_table)
+
+    log_solutions = list()
+    for table_i in tables_for_check:
+        log_solutions.append(lab_2.Chinese_remainder_theorem(a_list=table_i, mod_list=partial_moduls))
+
+    return log_solutions
 
 # Forth step of index_calculus
 def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_values: list) -> int:
@@ -326,10 +388,8 @@ def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_value
     while True:
         is_smooth = True
         a = beta * pow(alpha, l, n + 1) % (n + 1)
-        print(f">>> {a} = pow({alpha}, {l}, {n + 1})")
         
         canon_a = lab_1.get_canon_number_composition_silent(a)
-        print(f"{l}) {a} = {canon_a}")
         
         if canon_a is None:
             is_smooth = False
@@ -347,65 +407,105 @@ def find_log(alpha: int, beta: int, n: int, base: list, base_r: dict, logs_value
     
         l += 1
 
-def index_calculus(alpha: int, beta: int, n: int) -> int:
-    print("First step")
+def worker(argss):
+        # print(args)
+        i = argss[0]
+        args = argss[1]
+        rez = create_equations_multiproces(args["alpha"], args["beta"], args["n"], args["base"], args["base_r"],
+                      args["partion_size"] * i,
+                      args["partion_size"] + args["partion_size"] * i)
+        
+        return rez
+
+def index_calculus_multiproces(alpha: int, beta: int, n: int, processes_amount: int=4) -> int:
+    # print("First step")
     base, base_r = get_factor_base(n=n)
-    # print(base)
-    # print(base_r)
 
-    print("Second step")
+    # print("Second step")
+    expected_len = 3 * len(base)
+    partion_size = int(expected_len/processes_amount)
+    correct_len = partion_size*processes_amount
+
+    a_args = [i for i in range(processes_amount)]
+    second_args = {"alpha": alpha, "beta": beta, "n": n, "base": base, "base_r": base_r, "partion_size": partion_size}
+
+    equations = list()
+    b_values = list()
+    with Pool(processes = processes_amount) as pool:
+        # print(pool.map(worker, range(processes_amount), args=(alpha, beta, n, base, base_r, partion_size)))
+        equate_rezs = pool.map(worker, zip(a_args, itertools.repeat(second_args)))
+
+        for equate_rez in equate_rezs:
+            for eq in equate_rez[0]:
+                equations.append(eq)
+            
+            for b in equate_rez[1]:
+                b_values.append(b)
+
+    # print("Third step")
+    log_solutions = solve_equations(n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
+
+    # print("Forth step")
+    for logs_values in log_solutions:
+        x = int(find_log(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, logs_values=logs_values))
+        if pow(alpha, x, n + 1) == beta:
+            return x
+
+def index_calculus(alpha: int, beta: int, n: int) -> int:
+    # print("First step")
+    base, base_r = get_factor_base(n=n)
+
+    # print("Second step")
     equations, b_values = create_equations(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r)
-    # for eq in equations:
-    #     print(eq)
-    # print("")
 
-    print("Third step")
-    logs_values = solve_equations(n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
-    print(f"logs_values = \n{logs_values}")
+    # print("Third step")
+    log_solutions = solve_equations(n=n, base=base, base_r=base_r, equations=equations, b_values=b_values)
 
-    print("Forth step")
-    X = find_log(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, logs_values=logs_values)
-    print(f"X = {X}")
+    # print("Forth step")
+    for logs_values in log_solutions:
+        x = int(find_log(alpha=alpha, beta=beta, n=n, base=base, base_r=base_r, logs_values=logs_values))
+        if pow(alpha, x, n + 1) == beta:
+            return x
+    
+    # print(f"No solution")
 
-    return X
+    return
+
+def index_calculus_timed(alpha: int, beta: int, n: int, timeout: int=60*5) -> int:
+    timer = my_timer.My_Timer()
+
+    rez = None
+    try:
+        with time_limit(timeout):
+            while rez is None:
+                try:
+                    rez = index_calculus(alpha=alpha, beta=beta, n=n)
+                    # rez = index_calculus_multiproces(alpha=alpha, beta=beta, n=n)
+                except ValueError as ver:
+                    pass
+    except UserWarning as e:
+        print("Time out!")
+    
+    if rez:
+        print(f"{alpha}^x = {beta} (mod {n+1})")
+        print(f"Find: x = {rez}, spend: {timer.now():0.4f}s")
+    else:
+        print(f"No result, spend: {timer.now():0.4f}s")
+
+    return rez
 
 # **********************************************
 #                   Example
 # **********************************************
 
 def main():
-    alpha = 10
-    beta = 17
-    p = 47
+    alpha1_list = [304, 4278, 63906, 211693, 1620605, 15245244, 469727668, 1359824064, 24716418997, 528240302967]
+    beta1_list = [615, 6380, 65125, 35674, 71209, 3043565, 361909909, 726082814, 87306741861, 605294851516]
+    p1_list = [977, 6959, 88657, 219881, 1871017, 19701761, 624411923, 2390481859, 88260796907, 972274582501]
 
-    # alpha = 13 * 5519 * 23
-    # p = 3 * 11 * 5521
-    # beta = pow(alpha, 189, p)
+    for i in range(len(alpha1_list)):
+        x = index_calculus_timed(alpha=alpha1_list[i], beta=beta1_list[i], n=p1_list[i] - 1)
 
-    alpha = 304
-    beta = 615
-    p = 977
-
-    alpha = 211693
-    beta = 35674
-    p = 219881
-
-    temp_rezs = list()
-
-    for i in range(10):
-        try:
-            x = index_calculus(alpha=alpha, beta=beta, n=p-1)
-            temp_rezs.append(x)
-        except ValueError as e:
-            print(e)
-
-    for x in temp_rezs:
-        if pow(alpha, int(x[0]), p) == beta:
-            print(f"x = {x}")
-            return x[0]
-
-
-    return -1
 
 if __name__ == "__main__":
     main()
